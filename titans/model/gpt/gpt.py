@@ -17,9 +17,8 @@ from titans.layer.head import GPTLMHead
 from titans.layer.block import GPTBlock
 from titans.layer.loss.lm_loss import GPTLMLoss
 
-__all__ = [
-    'GPT', 'GPTLMLoss', 'gpt2_small', 'gpt2_medium', 'gpt2_large', 'gpt2_xl', 'gpt2_8B', 'gpt3'
-]
+__all__ = ['GPT', 'GPTLMLoss', 'gpt2_small', 'gpt2_medium', 'gpt2_large', 'gpt2_xl', 'gpt2_8B', 'gpt3']
+
 
 class GPT(nn.Module):
 
@@ -50,21 +49,19 @@ class GPT(nn.Module):
                                   dropout=embedding_dropout,
                                   dtype=dtype)
         self.blocks = nn.ModuleList([
-            GPTBlock(
-                dim=dim,
-                num_heads=num_heads,
-                mlp_ratio=mlp_ratio,
-                activation=activation,
-                attention_dropout=attention_dropout,
-                dropout=dropout,
-                layernorm_epsilon=layernorm_epsilon,
-                dtype=dtype,
-                bias=bias,
-                apply_post_layernorm=apply_post_layernorm,
-                fuse_scale_mask_softmax=fuse_scale_mask_softmax,
-                checkpoint=checkpoint,
-                activation_offload=activation_offload
-            ) for _ in range(depth)
+            GPTBlock(dim=dim,
+                     num_heads=num_heads,
+                     mlp_ratio=mlp_ratio,
+                     activation=activation,
+                     attention_dropout=attention_dropout,
+                     dropout=dropout,
+                     layernorm_epsilon=layernorm_epsilon,
+                     dtype=dtype,
+                     bias=bias,
+                     apply_post_layernorm=apply_post_layernorm,
+                     fuse_scale_mask_softmax=fuse_scale_mask_softmax,
+                     checkpoint=checkpoint,
+                     activation_offload=activation_offload) for _ in range(depth)
         ])
 
         self.norm = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
@@ -95,6 +92,7 @@ class GPT(nn.Module):
         x = self.head(self.norm(x))
 
         return x
+
 
 def _create_gpt_model(**model_kwargs):
     model = GPT(**model_kwargs)

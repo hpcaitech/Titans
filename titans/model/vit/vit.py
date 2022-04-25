@@ -32,6 +32,7 @@ __all__ = [
 
 
 class VisionTransformer(nn.Module):
+
     def __init__(self,
                  img_size: int = 224,
                  patch_size: int = 16,

@@ -5,6 +5,7 @@ from ..init_rules import _init_rules
 
 
 class ViTHead(nn.Module):
+
     def __init__(self,
                  dim: int,
                  num_classes: int,

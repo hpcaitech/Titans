@@ -122,4 +122,3 @@ class MOEGPTBlock(CheckpointModule):
         x = residual + self.mlp(x)
 
         return x, attention_mask
-
