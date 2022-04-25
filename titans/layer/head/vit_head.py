@@ -1,7 +1,7 @@
 from torch import dtype, nn
 
 from colossalai import nn as col_nn
-from ..init_rules import _init_rules
+from ..init_rules import init_rules
 
 
 class ViTHead(nn.Module):
@@ -19,7 +19,7 @@ class ViTHead(nn.Module):
                                                 representation_size,
                                                 bias=bias,
                                                 dtype=dtype,
-                                                **_init_rules[init_method]['head'])
+                                                **init_rules[init_method]['head'])
         else:
             self.representation = None
             representation_size = dim
@@ -28,7 +28,7 @@ class ViTHead(nn.Module):
                                        num_classes,
                                        dtype=dtype,
                                        bias=bias,
-                                       **_init_rules[init_method]['head'])
+                                       **init_rules[init_method]['head'])
 
     def forward(self, x):
         x = x[:, 0]
