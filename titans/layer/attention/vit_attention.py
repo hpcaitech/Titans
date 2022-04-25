@@ -6,7 +6,9 @@ from torch import dtype, nn
 from colossalai import nn as col_nn
 from ..init_rules import _init_rules
 
+
 class ViTSelfAttention(nn.Module):
+
     def __init__(self,
                  dim: int,
                  num_heads: int,
@@ -44,11 +46,10 @@ class ViTSelfAttention(nn.Module):
 
         x = torch.matmul(x, v)
         x = x.transpose(1, 2)
-        new_context_layer_shape = x.size()[:-2] + (all_head_size, )
+        new_context_layer_shape = x.size()[:-2] + (all_head_size,)
         x = x.reshape(new_context_layer_shape)
 
         x = self.dense(x)
         x = self.dropout(x)
 
         return x
-

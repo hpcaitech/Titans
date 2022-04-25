@@ -6,6 +6,7 @@ from ..init_rules import _init_rules
 
 
 class ViTEmbedding(nn.Module):
+
     def __init__(self,
                  img_size: int,
                  patch_size: int,
@@ -29,4 +30,3 @@ class ViTEmbedding(nn.Module):
         x = self.patch_embed(x)
         x = self.dropout(x)
         return x
-

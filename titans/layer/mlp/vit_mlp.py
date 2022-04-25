@@ -7,6 +7,7 @@ from ..init_rules import _init_rules
 
 
 class ViTMLP(nn.Module):
+
     def __init__(self,
                  dim: int,
                  mlp_ratio: int,
@@ -37,4 +38,3 @@ class ViTMLP(nn.Module):
         x = self.dense_2(x)
         x = self.dropout_2(x)
         return x
-

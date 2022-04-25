@@ -11,6 +11,7 @@ from titans.layer.mlp import ViTMLP
 
 
 class ViTBlock(CheckpointModule):
+
     def __init__(self,
                  dim: int,
                  num_heads: int,
