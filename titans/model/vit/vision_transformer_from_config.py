@@ -3,7 +3,6 @@
 
 import torch
 
-from colossalai.registry import MODELS
 from colossalai.nn.model.model_from_config import ModelFromConfig
 
 

@@ -5,73 +5,10 @@ from colossalai.nn.layer import MoeModule
 from colossalai.context import MOE_CONTEXT
 from colossalai.logging import get_dist_logger
 from colossalai.nn.layer.utils import CheckpointModule, divide
-from model_zoo.gpt.gpt import GPTEmbedding, GPTSelfAttention, GPTMLP, GPTBlock, GPTLMHead
 
-
-class MOEGPTBlock(CheckpointModule):
-
-    def __init__(self,
-                 num_experts: int,
-                 dim: int,
-                 num_heads: int,
-                 mlp_ratio: float,
-                 activation: Callable,
-                 capacity_factor_train: float = 1.0,
-                 capacity_factor_eval: float = 1.0,
-                 use_residual: bool = False,
-                 attention_dropout: float = 0.,
-                 dropout: float = 0.,
-                 layernorm_epsilon: float = 1e-5,
-                 dtype: dtype = None,
-                 bias: bool = True,
-                 apply_post_layernorm: bool = False,
-                 fuse_scale_mask_softmax: bool = False,
-                 checkpoint: bool = False):
-        super().__init__(checkpoint)
-        self.apply_post_layernorm = apply_post_layernorm
-        self.norm1 = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
-        self.attn = GPTSelfAttention(dim=dim,
-                                     num_heads=num_heads,
-                                     attention_dropout=attention_dropout,
-                                     dropout=dropout,
-                                     bias=bias,
-                                     fuse_scale_mask_softmax=fuse_scale_mask_softmax,
-                                     dtype=dtype)
-        self.norm2 = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
-
-        mpl_factory_dict = dict(dim=dim,
-                                mlp_ratio=mlp_ratio,
-                                activation=activation,
-                                dropout=dropout,
-                                dtype=dtype,
-                                bias=bias)
-
-        self.mlp = MoeModule(dim_model=dim,
-                             num_experts=num_experts,
-                             top_k=1,
-                             capacity_factor_train=capacity_factor_train,
-                             capacity_factor_eval=capacity_factor_eval,
-                             noisy_policy='Jitter',
-                             use_residual=use_residual,
-                             expert_cls=GPTMLP,
-                             **mpl_factory_dict)
-
-    def _forward(self, x, attention_mask=None):
-        if not self.apply_post_layernorm:
-            residual = x
-        x = self.norm1(x)
-        if self.apply_post_layernorm:
-            residual = x
-        x = residual + self.attn(x, attention_mask)
-
-        if not self.apply_post_layernorm:
-            residual = x
-        x = self.norm2(x)
-        if self.apply_post_layernorm:
-            residual = x
-        x = residual + self.mlp(x)
-
-        return x, attention_mask
+from titans.layer.embedding import GPTEmbedding
+from titans.layer.block import GPTBlock, MOEGPTBlock
+from titans.layer.head import GPTLMHead
 
 
 class MOEGPT(nn.Module):
