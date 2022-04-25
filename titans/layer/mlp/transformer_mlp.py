@@ -3,7 +3,7 @@ from typing import Callable
 from colossalai import nn as col_nn
 
 
-class GPTMLP(nn.Module):
+class TransformerMLP(nn.Module):
 
     def __init__(self,
                  dim: int,

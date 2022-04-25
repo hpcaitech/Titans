@@ -3,7 +3,7 @@ import math
 from colossalai import nn as col_nn
 from torch import nn
 
-_init_rules = dict(
+init_rules = dict(
     torch=dict(
         embed=dict(
             weight_initializer=col_nn.init.kaiming_uniform_(a=math.sqrt(5)),

@@ -2,7 +2,7 @@ import torch
 from torch import dtype, nn
 
 from colossalai import nn as col_nn
-from ..init_rules import _init_rules
+from ..init_rules import init_rules
 
 
 class ViTEmbedding(nn.Module):
@@ -23,7 +23,7 @@ class ViTEmbedding(nn.Module):
                                                  embedding_dim,
                                                  dtype=dtype,
                                                  flatten=flatten,
-                                                 **_init_rules[init_method]['embed'])
+                                                 **init_rules[init_method]['embed'])
         self.dropout = col_nn.Dropout(dropout)
 
     def forward(self, x):

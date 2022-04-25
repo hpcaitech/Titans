@@ -3,7 +3,7 @@ from typing import Callable
 from torch import dtype, nn
 
 from colossalai import nn as col_nn
-from ..init_rules import _init_rules
+from ..init_rules import init_rules
 
 
 class ViTMLP(nn.Module):
@@ -21,14 +21,14 @@ class ViTMLP(nn.Module):
                                      mlp_ratio * dim,
                                      dtype=dtype,
                                      bias=bias,
-                                     **_init_rules[init_method]['transformer'])
+                                     **init_rules[init_method]['transformer'])
         self.activation = activation
         self.dropout_1 = col_nn.Dropout(dropout)
         self.dense_2 = col_nn.Linear(mlp_ratio * dim,
                                      dim,
                                      dtype=dtype,
                                      bias=bias,
-                                     **_init_rules[init_method]['transformer'])
+                                     **init_rules[init_method]['transformer'])
         self.dropout_2 = col_nn.Dropout(dropout)
 
     def forward(self, x):

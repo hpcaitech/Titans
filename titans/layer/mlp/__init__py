@@ -1,2 +1,0 @@
-from .gpt_mlp import GPTMLP
-from .vit_mlp import ViTMLP

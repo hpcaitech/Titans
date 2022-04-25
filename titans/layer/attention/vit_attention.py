@@ -4,7 +4,7 @@ import torch
 from torch import dtype, nn
 
 from colossalai import nn as col_nn
-from ..init_rules import _init_rules
+from ..init_rules import init_rules
 
 
 class ViTSelfAttention(nn.Module):
@@ -23,9 +23,9 @@ class ViTSelfAttention(nn.Module):
                                              3 * dim,
                                              dtype=dtype,
                                              bias=bias,
-                                             **_init_rules[init_method]['transformer'])
+                                             **init_rules[init_method]['transformer'])
         self.attention_dropout = col_nn.Dropout(attention_dropout)
-        self.dense = col_nn.Linear(dim, dim, dtype=dtype, bias=True, **_init_rules[init_method]['transformer'])
+        self.dense = col_nn.Linear(dim, dim, dtype=dtype, bias=True, **init_rules[init_method]['transformer'])
         self.dropout = col_nn.Dropout(dropout)
         self.softmax = nn.Softmax(dim=-1)
 
