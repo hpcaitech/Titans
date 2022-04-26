@@ -1,3 +1,6 @@
 from .gpt_attention import GPTSelfAttention
 from .vit_attention import ViTSelfAttention
 from .vit_moe_attention import VanillaSelfAttention
+from .transformer_attention import TransformerSelfAttention, TransformerMultiHeadAttention
+from .attention_1d import GenericSelfAttention1D
+from .gpt_1d_attention import GPTSelfAttention1D, FusedGPTSelfAttention1D
