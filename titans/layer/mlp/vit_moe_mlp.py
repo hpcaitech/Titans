@@ -3,7 +3,7 @@ import torch.nn as nn
 from colossalai.utils import get_current_device
 
 
-class VanillaMLP(nn.Module):
+class MLPForMoe(nn.Module):
     """FFN composed with two linear layers, also called MLP.
     """
 
