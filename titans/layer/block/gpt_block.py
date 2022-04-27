@@ -11,6 +11,7 @@ from titans.layer.attention import GPTSelfAttention
 from titans.layer.mlp import GPTMLP
 
 
+
 class GPTBlock(CheckpointModule):
 
     def __init__(self,
@@ -102,7 +103,6 @@ class MOEGPTBlock(CheckpointModule):
                              capacity_factor_train=capacity_factor_train,
                              capacity_factor_eval=capacity_factor_eval,
                              noisy_policy='Jitter',
-                             use_residual=use_residual,
                              expert_cls=GPTMLP,
                              **mpl_factory_dict)
 
