@@ -6,7 +6,7 @@ import torch.nn as nn
 from colossalai.utils import get_current_device
 
 
-class VanillaSelfAttention(nn.Module):
+class SelfAttentionForMoe(nn.Module):
     """Standard ViT self attention.
     """
 

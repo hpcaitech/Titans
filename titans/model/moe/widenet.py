@@ -9,7 +9,7 @@ from .util import moe_sa_args
 from ..helper import TransformerLayer
 from colossalai.context.moe_context import MOE_CONTEXT
 
-from titans.layer.attention import VanillaSelfAttention
+from titans.layer.attention import SelfAttentionForMoe
 
 
 class Widenet(nn.Module):
@@ -39,7 +39,7 @@ class Widenet(nn.Module):
                                           embed_size=d_model)
         embed_dropout = Dropout(p=drop_rate, mode=ParallelMode.TENSOR)
 
-        shared_sa = VanillaSelfAttention(**moe_sa_args(
+        shared_sa = SelfAttentionForMoe(**moe_sa_args(
             d_model=d_model, n_heads=num_heads, d_kv=d_kv, attention_drop=attention_drop, drop_rate=drop_rate))
 
         noisy_func = NormalNoiseGenerator(num_experts)

@@ -10,8 +10,8 @@ from ..helper import TransformerLayer
 from colossalai.context.moe_context import MOE_CONTEXT
 
 from typing import List
-from titans.layer.mlp import VanillaMLP
-from titans.layer.attention import VanillaSelfAttention
+from titans.layer.mlp import MLPForMoe
+from titans.layer.attention import SelfAttentionForMoe
 
 
 class ViTMoE(nn.Module):
@@ -55,11 +55,11 @@ class ViTMoE(nn.Module):
         dpr = [x.item() for x in torch.linspace(0, drop_path, depth)]
         blocks = []
         for i in range(depth):
-            sa = VanillaSelfAttention(**moe_sa_args(
+            sa = SelfAttentionForMoe(**moe_sa_args(
                 d_model=d_model, n_heads=num_heads, d_kv=d_kv, attention_drop=attention_drop, drop_rate=drop_rate))
 
             if i % 2 == 0:
-                ffn = VanillaMLP(**moe_mlp_args(d_model=d_model, d_ff=d_ff, drop_rate=drop_rate))
+                ffn = MLPForMoe(**moe_mlp_args(d_model=d_model, d_ff=d_ff, drop_rate=drop_rate))
             else:
                 num_experts = num_experts_list[i // 2]
                 experts = build_ffn_experts(num_experts, d_model, d_ff, drop_rate=drop_rate)
@@ -72,7 +72,7 @@ class ViTMoE(nn.Module):
                                 drop_tks=drop_tks,
                                 use_residual=use_residual,
                                 expert_instance=experts,
-                                expert_cls=VanillaMLP,
+                                expert_cls=MLPForMoe,
                                 **moe_mlp_args(d_model=d_model, d_ff=d_ff, drop_rate=drop_rate))
 
             layer = TransformerLayer(att=sa,
