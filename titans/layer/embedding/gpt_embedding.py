@@ -31,7 +31,9 @@ class GPTEmbedding(nn.Module):
     def forward(self, input_ids, position_ids=None, tokentype_ids=None):
         seq_length = input_ids.size(1)
         if position_ids is None:
+            bs = input_ids.size(0)
             position_ids = torch.arange(seq_length, dtype=torch.long, device=get_current_device()).unsqueeze(0)
+            position_ids = position_ids.repeat(bs, 1)
         x = self.word_embeddings(input_ids) + self.position_embeddings(position_ids)
         if self.tokentype_embeddings is not None and tokentype_ids is not None:
             x = x + self.tokentype_embeddings(tokentype_ids)

@@ -1,7 +1,7 @@
 from torch import nn
 
 from colossalai import kernel
-from titan.layer.attention import GPTSelfAttention1D, FusedGPTSelfAttention1D
+from titans.layer.attention import GPTSelfAttention1D, FusedGPTSelfAttention1D
 from .transformer_1d import GenericTransformerLayer1D
 
 

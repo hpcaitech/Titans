@@ -12,8 +12,8 @@ from colossalai import nn as col_nn
 from colossalai.logging import get_dist_logger
 
 from titans.layer.block import GPTTransformerLayer1D, FusedGPTTransformerLayer1D, GPTBlock
-from titans.layer.embedding import HiddenParallelEmbedding, HiddenParallelLMHead1D, \
-                                    VocabParallelEmbedding, VocabParallelLMHead1D, GPTEmbedding
+from titans.layer.embedding import HiddenParallelEmbedding, VocabParallelEmbedding, GPTEmbedding
+from titans.layer.head import HiddenParallelGPTLMHead1D, VocabParallelGPTLMHead1D
 from titans.layer.head import GPTLMHead
 
 __all__ = [
