@@ -1,1 +1,1 @@
-from .mlm_loss.py import MLM_loss
+from .mlm_loss import MLM_loss
