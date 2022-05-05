@@ -54,17 +54,17 @@ class VisionTransformer(nn.Module):
                  init_method: str = 'torch'):
         super().__init__()
 
-        embed = ViTEmbedding(img_size=img_size,
-                             patch_size=patch_size,
-                             in_chans=in_chans,
-                             embedding_dim=dim,
-                             dropout=dropout,
-                             dtype=dtype,
-                             init_method=init_method)
+        self.embed = ViTEmbedding(img_size=img_size,
+                                  patch_size=patch_size,
+                                  in_chans=in_chans,
+                                  embedding_dim=dim,
+                                  dropout=dropout,
+                                  dtype=dtype,
+                                  init_method=init_method)
 
         # stochastic depth decay rule
         dpr = [x.item() for x in torch.linspace(0, drop_path, depth)]
-        blocks = [
+        self.blocks = nn.ModuleList([
             ViTBlock(
                 dim=dim,
                 num_heads=num_heads,
@@ -78,26 +78,22 @@ class VisionTransformer(nn.Module):
                 checkpoint=checkpoint,
                 init_method=init_method,
             ) for i in range(depth)
-        ]
+        ])
 
-        norm = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
+        self.norm = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
 
-        head = ViTHead(dim=dim,
-                       num_classes=num_classes,
-                       representation_size=representation_size,
-                       dtype=dtype,
-                       bias=bias,
-                       init_method=init_method)
-
-        self.layers = nn.Sequential(
-            embed,
-            *blocks,
-            norm,
-            head,
-        )
+        self.head = ViTHead(dim=dim,
+                            num_classes=num_classes,
+                            representation_size=representation_size,
+                            dtype=dtype,
+                            bias=bias,
+                            init_method=init_method)
 
     def forward(self, x):
-        x = self.layers(x)
+        x = self.embed(x)
+        for block in self.blocks:
+            x = block(x)
+        x = self.head(self.norm(x))
         return x
 
 
