@@ -3,7 +3,6 @@ from colossalai.context import ParallelMode
 from colossalai.core import global_context as gpc
 
 
-
 class BarrierContext():
     """
     This context manager is used to allow one process to execute while blocking all
@@ -23,7 +22,7 @@ class BarrierContext():
         current_rank = gpc.get_local_rank(parallel_mode=parallel_mode)
         self.should_block = current_rank != executor_rank
         self.group = gpc.get_group(parallel_mode=parallel_mode)
-    
+
     def __enter__(self):
         if self.should_block:
             dist.barrier(group=self.group)
