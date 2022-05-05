@@ -11,7 +11,6 @@ from titans.layer.attention import GPTSelfAttention
 from titans.layer.mlp import GPTMLP
 
 
-
 class GPTBlock(CheckpointModule):
 
     def __init__(self,
@@ -42,6 +41,8 @@ class GPTBlock(CheckpointModule):
         self.mlp = GPTMLP(dim=dim, mlp_ratio=mlp_ratio, activation=activation, dropout=dropout, dtype=dtype, bias=bias)
 
     def _forward(self, x, attention_mask=None):
+        if attention_mask.dtype != x.dtype:
+            attention_mask = attention_mask.to(x.dtype)
         if not self.apply_post_layernorm:
             residual = x
         x = self.norm1(x)

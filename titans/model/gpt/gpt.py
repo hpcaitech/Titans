@@ -15,7 +15,7 @@ from torch import dtype, nn
 from titans.layer.embedding import GPTEmbedding
 from titans.layer.head import GPTLMHead
 from titans.layer.block import GPTBlock
-from titans.layer.loss.lm_loss import GPTLMLoss
+from titans.loss.lm_loss import GPTLMLoss
 
 __all__ = ['GPT', 'GPTLMLoss', 'gpt2_small', 'gpt2_medium', 'gpt2_large', 'gpt2_xl', 'gpt2_8B', 'gpt3']
 
@@ -66,14 +66,15 @@ class GPT(nn.Module):
 
         self.norm = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
 
-        self.head = GPTLMHead(dim=dim,
-                              vocab_size=vocab_size,
-                              word_embeeding_weight=self.embed.word_embedding_weight,
-                              dtype=dtype)
+        self.head = GPTLMHead(
+            dim=dim,
+            vocab_size=vocab_size,
+            embedding_layer=self.embed,
+        #word_embeeding_weight=self.embed.word_embedding_weight,
+            dtype=dtype)
 
     def forward(self, input_ids, attention_mask=None):
         x = self.embed(input_ids)
-
         # We create a 3D attention mask from a 2D tensor mask.
         # Sizes are [batch_size, 1, 1, to_seq_length]
         # So we can broadcast to [batch_size, num_heads, from_seq_length, to_seq_length]
