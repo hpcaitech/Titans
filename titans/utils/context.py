@@ -28,6 +28,6 @@ class barrier_context():
         if self.should_block:
             dist.barrier(group=self.group)
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_value, exc_traceback):
         if not self.should_block:
             dist.barrier(group=self.group)
