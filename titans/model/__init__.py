@@ -6,5 +6,6 @@ from . import simclr
 from . import transformer
 from . import vilt
 from . import vit
+from . import deepnet
 
-__all__ = ['detr', 'gpt', 'knowledge_graph_embedding', 'moe', 'simclr', 'ransformer', 'vilt', 'vit']
+__all__ = ['detr', 'gpt', 'knowledge_graph_embedding', 'moe', 'simclr', 'ransformer', 'vilt', 'vit', 'deepnet']
