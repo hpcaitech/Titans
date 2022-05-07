@@ -55,7 +55,3 @@ def test_gpt(parallel_config):
 
     run_func = partial(run_dist, world_size=world_size, port=port, config=config)
     mp.spawn(run_func, nprocs=world_size)
-
-
-if __name__ == "__main__":
-    test_gpt((4, '2d'))
