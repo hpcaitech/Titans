@@ -10,7 +10,11 @@ class embeddingLoss(nn.Module):
     def forward(self, train_iterator, args, model):
 
         positive_sample, negative_sample, subsampling_weight, mode = next(train_iterator)
-
+        mode = mode[0]
+        if args.cuda:
+            positive_sample = positive_sample.cuda()
+            negative_sample = negative_sample.cuda()
+            subsampling_weight = subsampling_weight.cuda()
         negative_score = model((positive_sample, negative_sample), mode=mode)
 
         if args.negative_adversarial_sampling:
@@ -33,6 +37,6 @@ class embeddingLoss(nn.Module):
 
         loss = (positive_sample_loss + negative_sample_loss) / 2
 
-        torch.distributed.all_reduce(loss, group=gpc.get_group(ParallelMode.SEQUENCE))
+        torch.distributed.all_reduce(loss, group=gpc.get_group(ParallelMode.GLOBAL))
 
         return loss, positive_sample_loss, negative_sample_loss
