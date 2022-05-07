@@ -41,7 +41,7 @@ class GPTBlock(CheckpointModule):
         self.mlp = GPTMLP(dim=dim, mlp_ratio=mlp_ratio, activation=activation, dropout=dropout, dtype=dtype, bias=bias)
 
     def _forward(self, x, attention_mask=None):
-        if attention_mask.dtype != x.dtype:
+        if attention_mask is not None and attention_mask.dtype != x.dtype:
             attention_mask = attention_mask.to(x.dtype)
         if not self.apply_post_layernorm:
             residual = x

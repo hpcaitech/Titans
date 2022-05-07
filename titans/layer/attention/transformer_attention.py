@@ -11,20 +11,20 @@ class TransformerSelfAttention(nn.Module):
         self,
         dropout,
     ):
-        super(SelfAttention, self).__init__()
+        super(TransformerSelfAttention, self).__init__()
         self.dropout = col_nn.Dropout(dropout)
 
     def forward(self, queries, keys, values):
         d = queries.shape[-1]
-        scores = torch.bmm(queries, keys.transpose(1, 2)) / math.sqrt(d)
-        self.attention_weights = torch.softmax(scores, dim=2)
-        return torch.bmm(self.dropout(self.attention_weights), values)
+        scores = torch.matmul(queries, keys.transpose(-1, -2)) / math.sqrt(d)
+        attention_weights = torch.softmax(scores, dim=2)
+        return torch.matmul(self.dropout(attention_weights), values)
 
 
 class TransformerMultiHeadAttention(nn.Module):
 
     def __init__(self, d_model, num_hiddens, num_heads, dropout, bias=False):
-        super(MultiHeadAttention, self).__init__()
+        super(TransformerMultiHeadAttention, self).__init__()
         self.num_heads = num_heads
         self.attention = SelfAttention(dropout)
         self.W_q = col_nn.Linear(d_model, num_hiddens, bias=bias)
