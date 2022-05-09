@@ -8,10 +8,10 @@ from torch import dtype, nn
 
 from titans.layer.attention import ViTSelfAttention
 from titans.layer.mlp import ViTMLP
-from titans.decorator import no_support
+from titans.decorator import support_tp_pp_only
 
 
-@no_support(['sp', 'moe'])
+@support_tp_pp_only()
 class ViTBlock(CheckpointModule):
 
     def __init__(self,

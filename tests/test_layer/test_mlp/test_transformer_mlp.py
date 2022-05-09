@@ -1,6 +1,7 @@
 import colossalai
 import pytest
 import torch
+import torch.nn.functional as F
 
 from titans.layer.mlp import TransformerMLP, ViTMLP
 from titans.utils import split_data_for_tensor_parallel
