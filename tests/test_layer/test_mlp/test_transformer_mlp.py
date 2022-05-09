@@ -4,7 +4,7 @@ import torch
 import torch.multiprocessing as mp
 import torch.nn.functional as F
 
-from titans.layer.mlp import TransformerMLP, GPTMLP, ViTMLP
+from titans.layer.mlp import TransformerMLP, ViTMLP
 from titans.utils import split_data_for_tensor_parallel
 from colossalai.utils import free_port
 from functools import partial
@@ -19,18 +19,6 @@ def run_transformer_mlp(data, hidden_size):
 
     #build model
     model = TransformerMLP(hidden_size=hidden_size, mlp_ratio=4).cuda()
-
-    # forward
-    out = model(data)
-
-    # backward
-    out.mean().backward()
-
-
-def run_gpt_mlp(data, hidden_size):
-
-    #build model
-    model = GPTMLP(dim=hidden_size, mlp_ratio=4, activation=F.gelu, dropout=0.0).cuda()
 
     # forward
     out = model(data)
@@ -60,7 +48,6 @@ def run_dist(rank, world_size, port, config):
     data = torch.rand(BATCH_SIZE, SEQ_LENGTH, HIDDEN_SIZE).cuda()
     data = split_data_for_tensor_parallel(data)
     run_transformer_mlp(data, HIDDEN_SIZE)
-    run_gpt_mlp(data, HIDDEN_SIZE)
     run_vit_mlp(data, HIDDEN_SIZE)
 
 
