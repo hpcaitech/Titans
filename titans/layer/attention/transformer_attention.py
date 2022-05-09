@@ -3,8 +3,10 @@ import math
 import torch
 from torch import nn
 from colossalai import nn as col_nn
+from titans.decorator import no_support
 
 
+@no_support(['sp'])
 class TransformerSelfAttention(nn.Module):
 
     def __init__(
@@ -21,6 +23,7 @@ class TransformerSelfAttention(nn.Module):
         return torch.matmul(self.dropout(attention_weights), values)
 
 
+@no_support(['sp'])
 class TransformerMultiHeadAttention(nn.Module):
 
     def __init__(self, d_model, num_hiddens, num_heads, dropout, bias=False):

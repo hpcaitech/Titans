@@ -9,8 +9,10 @@ from colossalai.nn.layer import MoeModule
 
 from titans.layer.attention import GPTSelfAttention
 from titans.layer.mlp import GPTMLP
+from titans.decorator import no_support
 
 
+@no_support(['sp', 'moe'])
 class GPTBlock(CheckpointModule):
 
     def __init__(self,
