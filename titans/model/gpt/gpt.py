@@ -16,10 +16,12 @@ from titans.layer.embedding import GPTEmbedding
 from titans.layer.head import GPTLMHead
 from titans.layer.block import GPTBlock
 from titans.loss.lm_loss import GPTLMLoss
+from titans.decorator import no_support
 
 __all__ = ['GPT', 'GPTLMLoss', 'gpt2_small', 'gpt2_medium', 'gpt2_large', 'gpt2_xl', 'gpt2_8B', 'gpt3']
 
 
+@no_support(['sp', 'moe'])
 class GPT(nn.Module):
 
     def __init__(self,
