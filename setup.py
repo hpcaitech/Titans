@@ -1,22 +1,26 @@
 import os
 
-from setuptools import find_packages, setup
+from setuptools import setup
 
 # ninja build does not work unless include_dirs are abs path
 this_dir = os.path.dirname(os.path.abspath(__file__))
 ext_modules = []
 
+
 def fetch_requirements(path):
     with open(path, 'r') as fd:
         return [r.strip() for r in fd.readlines()]
+
 
 def fetch_readme():
     with open('README.md', encoding='utf-8') as f:
         return f.read()
 
+
 def get_version():
     with open('version.txt') as f:
         return f.read().strip()
+
 
 setup(
     name='titans',
