@@ -64,8 +64,7 @@ def run_dist(rank, world_size, port, config):
     run_vit_mlp(data, HIDDEN_SIZE)
 
 
-@pytest.mark.parametrize('parallel_config', [(4, 'sequence'), (4, '1d'), (4, '2d'), (4, '2.5d'), (8, '2.5d'),
-                                             (8, '3d')])
+@pytest.mark.parametrize('parallel_config', [(4, '1d'), (4, '2d'), (4, '2.5d'), (8, '2.5d'), (8, '3d')])
 def test_transformer_mlp(parallel_config):
     world_size, tp_mode = parallel_config
     port = free_port()
