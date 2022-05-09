@@ -9,11 +9,11 @@ from colossalai.nn.layer import MoeModule
 
 from titans.layer.attention import GPTSelfAttention
 
-from titans.decorator import no_support
+from titans.decorator import support_tp_pp_only
 from titans.layer.mlp import TransformerMLP
 
 
-@no_support(['sp', 'moe'])
+@support_tp_pp_only()
 class GPTBlock(CheckpointModule):
 
     def __init__(self,
@@ -41,10 +41,10 @@ class GPTBlock(CheckpointModule):
                                      fuse_scale_mask_softmax=fuse_scale_mask_softmax,
                                      dtype=dtype)
         self.norm2 = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
-        self.mlp = TransformerMLP(dim=dim,
+        self.mlp = TransformerMLP(hidden_size=dim,
                                   mlp_ratio=mlp_ratio,
-                                  activation=activation,
-                                  dropout=dropout,
+                                  act_func=activation,
+                                  dropout_prob=dropout,
                                   dtype=dtype,
                                   bias=bias)
 
