@@ -6,8 +6,10 @@ from torch import dtype, nn
 from colossalai import nn as col_nn
 from colossalai.nn.layer.utils import divide
 from colossalai.utils import get_current_device
+from titans.decorator import no_support
 
 
+@no_support(['sp'])
 class GPTSelfAttention(nn.Module):
 
     def __init__(self,

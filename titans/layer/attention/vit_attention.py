@@ -5,8 +5,10 @@ from torch import dtype, nn
 
 from colossalai import nn as col_nn
 from ..init_rules import init_rules
+from titans.decorator import no_support
 
 
+@no_support(['sp'])
 class ViTSelfAttention(nn.Module):
 
     def __init__(self,
