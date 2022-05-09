@@ -8,8 +8,9 @@ from colossalai import nn as col_nn
 from colossalai.nn.layer import MoeModule
 
 from titans.layer.attention import GPTSelfAttention
-from titans.layer.mlp import GPTMLP
+
 from titans.decorator import no_support
+from titans.layer.mlp import TransformerMLP
 
 
 @no_support(['sp', 'moe'])
@@ -40,7 +41,12 @@ class GPTBlock(CheckpointModule):
                                      fuse_scale_mask_softmax=fuse_scale_mask_softmax,
                                      dtype=dtype)
         self.norm2 = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
-        self.mlp = GPTMLP(dim=dim, mlp_ratio=mlp_ratio, activation=activation, dropout=dropout, dtype=dtype, bias=bias)
+        self.mlp = TransformerMLP(dim=dim,
+                                  mlp_ratio=mlp_ratio,
+                                  activation=activation,
+                                  dropout=dropout,
+                                  dtype=dtype,
+                                  bias=bias)
 
     def _forward(self, x, attention_mask=None):
         if attention_mask is not None and attention_mask.dtype != x.dtype:
@@ -106,7 +112,7 @@ class MOEGPTBlock(CheckpointModule):
                              capacity_factor_train=capacity_factor_train,
                              capacity_factor_eval=capacity_factor_eval,
                              noisy_policy='Jitter',
-                             expert_cls=GPTMLP,
+                             expert_cls=TransformerMLP,
                              **mpl_factory_dict)
 
     def _forward(self, x, attention_mask=None):
