@@ -1,0 +1,31 @@
+name: Build
+
+on: 
+  pull_request:
+    types: [synchronize, labeled]
+
+jobs:
+  build:
+    name: Build and Test Colossal-AI
+    if: |
+        github.event.pull_request.draft == false &&
+        github.base_ref == 'main' &&
+        github.event.pull_request.base.repo.full_name == 'hpcaitech/Titans' &&
+        contains( github.event.pull_request.labels.*.name, 'Run Build and Test')
+    runs-on: [self-hosted, gpu]
+    container:
+      image: frankleeeee/pytorch-cuda:1.10.1-11.3.0
+      options: --gpus all --rm
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ssh-key: ${{ secrets.SSH_KEY_FOR_CI }}
+      - name: Install Colossal-AI      
+        run: |
+          pip install colossalai==0.1.4+torch1.10cu11.3 -f https://release.colossalai.org
+          pip install -r requirements/requirements.txt
+          pip install -r requirements/requirements-test.txt
+      - name: Unit Testing
+        run: |
+          PYTHONPATH=$PWD pytest tests
