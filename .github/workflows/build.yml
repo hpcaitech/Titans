@@ -24,7 +24,7 @@ jobs:
       - name: Install Colossal-AI      
         run: |
           pip install colossalai==0.1.4+torch1.10cu11.3 -f https://release.colossalai.org
-          pip install -r requirements/requirements.txt
+          pip install -v .
           pip install -r requirements/requirements-test.txt
       - name: Unit Testing
         run: |
