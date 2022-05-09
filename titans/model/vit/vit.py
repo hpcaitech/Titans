@@ -9,6 +9,7 @@ from torch import dtype, nn
 from titans.layer.embedding import ViTEmbedding
 from titans.layer.head import ViTHead
 from titans.layer.block import ViTBlock
+from titans.decorator import no_support
 
 __all__ = [
     'VisionTransformer',
@@ -31,6 +32,7 @@ __all__ = [
 ]
 
 
+@no_support(['sp', 'moe'])
 class VisionTransformer(nn.Module):
 
     def __init__(self,
