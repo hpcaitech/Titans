@@ -11,6 +11,7 @@ import inspect
 from colossalai.builder.pipeline import partition_uniform
 from colossalai import kernel
 from colossalai.logging import get_dist_logger
+from titans.decorator import support_tp_pp_only
 from titans.layer.block import DeepNetBlock
 from titans.layer.embedding import GPTEmbedding
 from titans.layer.head import GPTLMHead
@@ -20,6 +21,7 @@ from titans.loss.lm_loss import GPTLMLoss
 __all__ = ['DeepNet', 'deepnet_small']
 
 
+@support_tp_pp_only()
 class DeepNet(nn.Module):
 
     def __init__(self,

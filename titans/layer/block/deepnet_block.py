@@ -8,10 +8,12 @@ from colossalai.utils.activation_checkpoint import checkpoint
 from colossalai.nn.layer.utils import CheckpointModule
 from colossalai.nn.layer.base_layer import ParallelLayer
 from colossalai import kernel
+from titans.decorator import support_tp_pp_only
 from titans.layer.attention import GPTSelfAttention
 from titans.layer.mlp import TransformerMLP
 
 
+@support_tp_pp_only()
 class DeepNetBlock(CheckpointModule):
 
     def __init__(self,
@@ -47,7 +49,7 @@ class DeepNetBlock(CheckpointModule):
                                   bias=bias)
 
     def _forward(self, x, attention_mask=None):
-        if attention_mask.dtype != x.dtype:
+        if attention_mask is not None and attention_mask.dtype != x.dtype:
             attention_mask = attention_mask.to(x.dtype)
 
         residual = x
