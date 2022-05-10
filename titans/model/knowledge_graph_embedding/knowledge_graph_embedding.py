@@ -9,7 +9,7 @@ class KGEModel(nn.Module):
                  model_name,
                  nentity,
                  nrelation,
-                 hidden_dim,
+                 hidden_size,
                  gamma,
                  double_entity_embedding=False,
                  double_relation_embedding=False):
@@ -17,16 +17,16 @@ class KGEModel(nn.Module):
         self.model_name = model_name
         self.nentity = nentity
         self.nrelation = nrelation
-        self.hidden_dim = hidden_dim
+        self.hidden_size = hidden_size
         self.epsilon = 2.0
 
         self.gamma = nn.Parameter(torch.Tensor([gamma]), requires_grad=False)
 
-        self.embedding_range = nn.Parameter(torch.Tensor([(self.gamma.item() + self.epsilon) / hidden_dim]),
+        self.embedding_range = nn.Parameter(torch.Tensor([(self.gamma.item() + self.epsilon) / hidden_size]),
                                             requires_grad=False)
 
-        self.entity_dim = hidden_dim * 2 if double_entity_embedding else hidden_dim
-        self.relation_dim = hidden_dim * 2 if double_relation_embedding else hidden_dim
+        self.entity_dim = hidden_size * 2 if double_entity_embedding else hidden_size
+        self.relation_dim = hidden_size * 2 if double_relation_embedding else hidden_size
 
         self.entity_embedding = nn.Parameter(torch.zeros(nentity, self.entity_dim))
         nn.init.uniform_(tensor=self.entity_embedding, a=-self.embedding_range.item(), b=self.embedding_range.item())

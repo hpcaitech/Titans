@@ -23,7 +23,7 @@ HIDDEN_SIZE = 32
 def run_vit_block(data, hidden_size, num_heads):
 
     #build model
-    model = ViTBlock(dim=hidden_size, num_heads=num_heads, mlp_ratio=4, activation=F.gelu).cuda()
+    model = ViTBlock(hidden_size=hidden_size, num_heads=num_heads, mlp_ratio=4, activation=F.gelu).cuda()
 
     # forward
     out = model(data)

@@ -20,7 +20,7 @@ def run_gpt_head(data, hidden_size, vocab_size):
     #build model
     embedding_layer = GPTEmbedding(embedding_dim=hidden_size, vocab_size=vocab_size,
                                    max_position_embeddings=1024).cuda()
-    model = GPTLMHead(dim=hidden_size, vocab_size=vocab_size, embedding_layer=embedding_layer).cuda()
+    model = GPTLMHead(hidden_size=hidden_size, vocab_size=vocab_size, embedding_layer=embedding_layer).cuda()
 
     # forward
     out = model(data)

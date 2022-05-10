@@ -17,7 +17,7 @@ from titans.layer.mlp import TransformerMLP
 class DeepNetBlock(CheckpointModule):
 
     def __init__(self,
-                 dim: int,
+                 hidden_size: int,
                  num_heads: int,
                  mlp_ratio: float,
                  activation: Callable,
@@ -31,8 +31,8 @@ class DeepNetBlock(CheckpointModule):
                  checkpoint: bool = False,
                  activation_offload: bool = False):
         super().__init__(checkpoint, activation_offload)
-        self.norm1 = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
-        self.attn = GPTSelfAttention(dim=dim,
+        self.norm1 = col_nn.LayerNorm(normalized_shape=hidden_size, eps=layernorm_epsilon, dtype=dtype)
+        self.attn = GPTSelfAttention(hidden_size=hidden_size,
                                      num_heads=num_heads,
                                      attention_dropout=attention_dropout,
                                      dropout=dropout,
@@ -40,10 +40,10 @@ class DeepNetBlock(CheckpointModule):
                                      fuse_scale_mask_softmax=fuse_scale_mask_softmax,
                                      dtype=dtype)
         self.alpha = alpha
-        self.norm2 = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
-        self.mlp = TransformerMLP(hidden_size=dim,
+        self.norm2 = col_nn.LayerNorm(normalized_shape=hidden_size, eps=layernorm_epsilon, dtype=dtype)
+        self.mlp = TransformerMLP(hidden_size=hidden_size,
                                   mlp_ratio=mlp_ratio,
-                                  act_func=activation,
+                                  activation=activation,
                                   dropout_prob=dropout,
                                   dtype=dtype,
                                   bias=bias)

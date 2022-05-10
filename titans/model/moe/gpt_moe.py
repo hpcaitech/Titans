@@ -20,7 +20,7 @@ class MOEGPT(nn.Module):
                  capacity_factor_eval: float = 1.0,
                  vocab_size: int = 50304,
                  max_position_embeddings: int = 1024,
-                 dim: int = 768,
+                 hidden_size: int = 768,
                  num_heads: int = 12,
                  depth: int = 12,
                  mlp_ratio: float = 4.0,
@@ -45,7 +45,7 @@ class MOEGPT(nn.Module):
         else:
             num_experts_list = [num_experts] * half_depth
 
-        self.embed = GPTEmbedding(embedding_dim=dim,
+        self.embed = GPTEmbedding(embedding_dim=hidden_size,
                                   vocab_size=vocab_size,
                                   max_position_embeddings=max_position_embeddings,
                                   padding_idx=padding_idx,
@@ -53,7 +53,7 @@ class MOEGPT(nn.Module):
                                   dtype=dtype)
 
         block_list = []
-        block_factory_dict = dict(dim=dim,
+        block_factory_dict = dict(hidden_size=hidden_size,
                                   num_heads=num_heads,
                                   mlp_ratio=mlp_ratio,
                                   activation=activation,
@@ -82,11 +82,11 @@ class MOEGPT(nn.Module):
 
         self.blocks = nn.ModuleList(block_list)
 
-        self.norm = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
+        self.norm = col_nn.LayerNorm(normalized_shape=hidden_size, eps=layernorm_epsilon, dtype=dtype)
 
-        self.head = GPTLMHead(dim=dim,
+        self.head = GPTLMHead(hidden_size=hidden_size,
                               vocab_size=vocab_size,
-                              word_embeeding_weight=self.embed.word_embedding_weight,
+                              embedding_layer=self.embed,
                               dtype=dtype)
 
     def forward(self, input_ids, attention_mask=None):
@@ -131,7 +131,7 @@ def prmoe_4b(**kwargs):
     _prmoe_check_sanity(kwargs)
     model_kwargs = dict(num_experts=[32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 64, 64],
                         use_residual=True,
-                        dim=1024,
+                        hidden_size=1024,
                         depth=24,
                         num_heads=16,
                         **kwargs)
@@ -142,7 +142,7 @@ def prmoe_31b(**kwargs):
     _prmoe_check_sanity(kwargs)
     model_kwargs = dict(num_experts=[64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 128, 128],
                         use_residual=True,
-                        dim=2048,
+                        hidden_size=2048,
                         depth=24,
                         num_heads=16,
                         **kwargs)
@@ -153,7 +153,7 @@ def prmoe_51b(**kwargs):
     _prmoe_check_sanity(kwargs)
     model_kwargs = dict(num_experts=[32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 64, 64, 64, 64],
                         use_residual=True,
-                        dim=3072,
+                        hidden_size=3072,
                         depth=32,
                         num_heads=24,
                         **kwargs)

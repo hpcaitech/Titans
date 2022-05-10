@@ -14,7 +14,7 @@ class TransformerMLP(nn.Module):
     Args:
         hidden_size (int): the dimension of the linear layer.
         mlp_ratio (int): the multiplication factor of the linear dimension, default is 4.
-        act_func (Callable): the activation function, default is None which will use GeLU.
+        activation (Callable): the activation function, default is None which will use GeLU.
         dropout_prob (float): the probability of dropout, default is 0.
         dtype (torch.dtype): the data type for model parameters, default is None.
         bias (bool): whether the linear layers have bias, default is True.
@@ -23,7 +23,7 @@ class TransformerMLP(nn.Module):
     def __init__(self,
                  hidden_size: int,
                  mlp_ratio: int = 4,
-                 act_func: Callable = None,
+                 activation: Callable = None,
                  dropout_prob: float = 0.0,
                  dtype: dtype = None,
                  bias: bool = True):
@@ -35,10 +35,10 @@ class TransformerMLP(nn.Module):
         self.linear_2 = col_nn.Linear(intermediate_dim, hidden_size, dtype=dtype, bias=bias)
 
         # int activation function
-        if act_func:
-            self.act_func = act_func
+        if activation:
+            self.activation = activation
         else:
-            self.act_func = F.gelu
+            self.activation = F.gelu
 
         # init dropout
         if dropout_prob > 0:
@@ -48,7 +48,7 @@ class TransformerMLP(nn.Module):
 
     def forward(self, x: Tensor) -> Tensor:
         intermediate_activate = self.linear_1(x)
-        intermediate_activate = self.act_func(intermediate_activate)
+        intermediate_activate = self.activation(intermediate_activate)
 
         output = self.linear_2(intermediate_activate)
 

@@ -12,7 +12,7 @@ from titans.decorator import no_support
 class ViTSelfAttention(nn.Module):
 
     def __init__(self,
-                 dim: int,
+                 hidden_size: int,
                  num_heads: int,
                  attention_dropout: float,
                  dropout: float,
@@ -20,14 +20,14 @@ class ViTSelfAttention(nn.Module):
                  dtype: dtype = None,
                  init_method: str = 'torch'):
         super().__init__()
-        self.attention_head_size = dim // num_heads
-        self.query_key_value = col_nn.Linear(dim,
-                                             3 * dim,
+        self.attention_head_size = hidden_size // num_heads
+        self.query_key_value = col_nn.Linear(hidden_size,
+                                             3 * hidden_size,
                                              dtype=dtype,
                                              bias=bias,
                                              **init_rules[init_method]['transformer'])
         self.attention_dropout = col_nn.Dropout(attention_dropout)
-        self.dense = col_nn.Linear(dim, dim, dtype=dtype, bias=True, **init_rules[init_method]['transformer'])
+        self.dense = col_nn.Linear(hidden_size, hidden_size, dtype=dtype, bias=True, **init_rules[init_method]['transformer'])
         self.dropout = col_nn.Dropout(dropout)
         self.softmax = nn.Softmax(dim=-1)
 

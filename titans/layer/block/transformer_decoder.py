@@ -7,15 +7,15 @@ from .utils import get_clones
 
 class TransformerDecoderLayer(nn.Module):
 
-    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1):
+    def __init__(self, hidden_size, nhead, dim_feedforward=2048, dropout=0.1):
         super().__init__()
-        self.selfAttn = TransformerMultiHeadAttention(d_model, dim_feedforward, nhead, dropout)
+        self.selfAttn = TransformerMultiHeadAttention(hidden_size, dim_feedforward, nhead, dropout)
 
-        self.linear_1 = col_nn.Linear(d_model, dim_feedforward)
-        self.linear_2 = col_nn.Linear(dim_feedforward, d_model)
-        self.norm_1 = col_nn.LayerNorm(d_model)
-        self.norm_2 = col_nn.LayerNorm(d_model)
-        self.norm_3 = col_nn.LayerNorm(d_model)
+        self.linear_1 = col_nn.Linear(hidden_size, dim_feedforward)
+        self.linear_2 = col_nn.Linear(dim_feedforward, hidden_size)
+        self.norm_1 = col_nn.LayerNorm(hidden_size)
+        self.norm_2 = col_nn.LayerNorm(hidden_size)
+        self.norm_3 = col_nn.LayerNorm(hidden_size)
         self.dropout_1 = col_nn.Dropout(dropout)
         self.dropout_2 = col_nn.Dropout(dropout)
         self.dropout_3 = col_nn.Dropout(dropout)

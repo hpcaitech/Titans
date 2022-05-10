@@ -42,7 +42,7 @@ class VisionTransformer(nn.Module):
                  num_classes: int = 1000,
                  depth: int = 12,
                  num_heads: int = 12,
-                 dim: int = 768,
+                 hidden_size: int = 768,
                  mlp_ratio: int = 4,
                  attention_dropout: float = 0.,
                  dropout: float = 0.1,
@@ -59,7 +59,7 @@ class VisionTransformer(nn.Module):
         self.embed = ViTEmbedding(img_size=img_size,
                                   patch_size=patch_size,
                                   in_chans=in_chans,
-                                  embedding_dim=dim,
+                                  embedding_dim=hidden_size,
                                   dropout=dropout,
                                   dtype=dtype,
                                   init_method=init_method)
@@ -68,7 +68,7 @@ class VisionTransformer(nn.Module):
         dpr = [x.item() for x in torch.linspace(0, drop_path, depth)]
         self.blocks = nn.ModuleList([
             ViTBlock(
-                dim=dim,
+                hidden_size=hidden_size,
                 num_heads=num_heads,
                 mlp_ratio=mlp_ratio,
                 attention_dropout=attention_dropout,
@@ -82,9 +82,9 @@ class VisionTransformer(nn.Module):
             ) for i in range(depth)
         ])
 
-        self.norm = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
+        self.norm = col_nn.LayerNorm(normalized_shape=hidden_size, eps=layernorm_epsilon, dtype=dtype)
 
-        self.head = ViTHead(dim=dim,
+        self.head = ViTHead(hidden_size=hidden_size,
                             num_classes=num_classes,
                             representation_size=representation_size,
                             dtype=dtype,
@@ -105,80 +105,80 @@ def _create_vit_model(**model_kwargs):
 
 
 def vit_lite_depth7_patch4_32(**kwargs):
-    model_kwargs = dict(img_size=32, patch_size=4, dim=256, depth=7, num_heads=4, mlp_ratio=2, num_classes=10, **kwargs)
+    model_kwargs = dict(img_size=32, patch_size=4, hidden_size=256, depth=7, num_heads=4, mlp_ratio=2, num_classes=10, **kwargs)
     return _create_vit_model(**model_kwargs)
 
 
 def vit_tiny_patch4_32(**kwargs):
-    model_kwargs = dict(img_size=32, patch_size=4, dim=512, depth=6, num_heads=8, mlp_ratio=1, num_classes=10, **kwargs)
+    model_kwargs = dict(img_size=32, patch_size=4, hidden_size=512, depth=6, num_heads=8, mlp_ratio=1, num_classes=10, **kwargs)
     return _create_vit_model(**model_kwargs)
 
 
 def vit_tiny_patch16_224(**kwargs):
-    model_kwargs = dict(img_size=224, patch_size=16, dim=192, depth=12, num_heads=3, mlp_ratio=4, **kwargs)
+    model_kwargs = dict(img_size=224, patch_size=16, hidden_size=192, depth=12, num_heads=3, mlp_ratio=4, **kwargs)
     return _create_vit_model(**model_kwargs)
 
 
 def vit_tiny_patch16_384(**kwargs):
-    model_kwargs = dict(img_size=384, patch_size=16, dim=192, depth=12, num_heads=3, mlp_ratio=4, **kwargs)
+    model_kwargs = dict(img_size=384, patch_size=16, hidden_size=192, depth=12, num_heads=3, mlp_ratio=4, **kwargs)
     return _create_vit_model(**model_kwargs)
 
 
 def vit_small_patch16_224(**kwargs):
-    model_kwargs = dict(img_size=224, patch_size=16, dim=384, depth=12, num_heads=6, mlp_ratio=4, **kwargs)
+    model_kwargs = dict(img_size=224, patch_size=16, hidden_size=384, depth=12, num_heads=6, mlp_ratio=4, **kwargs)
     return _create_vit_model(**model_kwargs)
 
 
 def vit_small_patch16_384(**kwargs):
-    model_kwargs = dict(img_size=384, patch_size=16, dim=384, depth=12, num_heads=6, mlp_ratio=4, **kwargs)
+    model_kwargs = dict(img_size=384, patch_size=16, hidden_size=384, depth=12, num_heads=6, mlp_ratio=4, **kwargs)
     return _create_vit_model(**model_kwargs)
 
 
 def vit_small_patch32_224(**kwargs):
-    model_kwargs = dict(img_size=224, patch_size=32, dim=384, depth=12, num_heads=6, mlp_ratio=4, **kwargs)
+    model_kwargs = dict(img_size=224, patch_size=32, hidden_size=384, depth=12, num_heads=6, mlp_ratio=4, **kwargs)
     return _create_vit_model(**model_kwargs)
 
 
 def vit_small_patch32_384(**kwargs):
-    model_kwargs = dict(img_size=384, patch_size=32, dim=384, depth=12, num_heads=6, mlp_ratio=4, **kwargs)
+    model_kwargs = dict(img_size=384, patch_size=32, hidden_size=384, depth=12, num_heads=6, mlp_ratio=4, **kwargs)
     return _create_vit_model(**model_kwargs)
 
 
 def vit_base_patch16_224(**kwargs):
-    model_kwargs = dict(img_size=224, patch_size=16, dim=768, depth=12, num_heads=12, mlp_ratio=4, **kwargs)
+    model_kwargs = dict(img_size=224, patch_size=16, hidden_size=768, depth=12, num_heads=12, mlp_ratio=4, **kwargs)
     return _create_vit_model(**model_kwargs)
 
 
 def vit_base_patch16_384(**kwargs):
-    model_kwargs = dict(img_size=384, patch_size=16, dim=768, depth=12, num_heads=12, mlp_ratio=4, **kwargs)
+    model_kwargs = dict(img_size=384, patch_size=16, hidden_size=768, depth=12, num_heads=12, mlp_ratio=4, **kwargs)
     return _create_vit_model(**model_kwargs)
 
 
 def vit_base_patch32_224(**kwargs):
-    model_kwargs = dict(img_size=224, patch_size=32, dim=768, depth=12, num_heads=12, mlp_ratio=4, **kwargs)
+    model_kwargs = dict(img_size=224, patch_size=32, hidden_size=768, depth=12, num_heads=12, mlp_ratio=4, **kwargs)
     return _create_vit_model(**model_kwargs)
 
 
 def vit_base_patch32_384(**kwargs):
-    model_kwargs = dict(img_size=384, patch_size=32, dim=768, depth=12, num_heads=12, mlp_ratio=4, **kwargs)
+    model_kwargs = dict(img_size=384, patch_size=32, hidden_size=768, depth=12, num_heads=12, mlp_ratio=4, **kwargs)
     return _create_vit_model(**model_kwargs)
 
 
 def vit_large_patch16_224(**kwargs):
-    model_kwargs = dict(img_size=224, patch_size=16, dim=1024, depth=24, num_heads=16, mlp_ratio=4, **kwargs)
+    model_kwargs = dict(img_size=224, patch_size=16, hidden_size=1024, depth=24, num_heads=16, mlp_ratio=4, **kwargs)
     return _create_vit_model(**model_kwargs)
 
 
 def vit_large_patch16_384(**kwargs):
-    model_kwargs = dict(img_size=384, patch_size=16, dim=1024, depth=24, num_heads=16, mlp_ratio=4, **kwargs)
+    model_kwargs = dict(img_size=384, patch_size=16, hidden_size=1024, depth=24, num_heads=16, mlp_ratio=4, **kwargs)
     return _create_vit_model(**model_kwargs)
 
 
 def vit_large_patch32_224(**kwargs):
-    model_kwargs = dict(img_size=224, patch_size=32, dim=1024, depth=24, num_heads=16, mlp_ratio=4, **kwargs)
+    model_kwargs = dict(img_size=224, patch_size=32, hidden_size=1024, depth=24, num_heads=16, mlp_ratio=4, **kwargs)
     return _create_vit_model(**model_kwargs)
 
 
 def vit_large_patch32_384(**kwargs):
-    model_kwargs = dict(img_size=384, patch_size=32, dim=1024, depth=24, num_heads=16, mlp_ratio=4, **kwargs)
+    model_kwargs = dict(img_size=384, patch_size=32, hidden_size=1024, depth=24, num_heads=16, mlp_ratio=4, **kwargs)
     return _create_vit_model(**model_kwargs)

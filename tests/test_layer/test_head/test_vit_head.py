@@ -17,7 +17,7 @@ HIDDEN_SIZE = 32
 def run_vit_head(data, hidden_size, num_classes):
 
     #build model
-    model = ViTHead(dim=hidden_size, num_classes=num_classes).cuda()
+    model = ViTHead(hidden_size=hidden_size, num_classes=num_classes).cuda()
 
     # forward
     out = model(data)

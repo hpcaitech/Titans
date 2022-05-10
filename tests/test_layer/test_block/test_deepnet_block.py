@@ -18,7 +18,7 @@ HIDDEN_SIZE = 32
 def run_deepnet_block(data, hidden_size, num_heads):
 
     #build model
-    model = DeepNetBlock(dim=hidden_size, num_heads=num_heads, mlp_ratio=4.0, activation=F.gelu).cuda()
+    model = DeepNetBlock(hidden_size=hidden_size, num_heads=num_heads, mlp_ratio=4.0, activation=F.gelu).cuda()
 
     # forward
     out, _ = model(data)

@@ -15,7 +15,7 @@ from titans.decorator import support_tp_pp_only
 class ViTBlock(CheckpointModule):
 
     def __init__(self,
-                 dim: int,
+                 hidden_size: int,
                  num_heads: int,
                  mlp_ratio: int,
                  activation: Callable,
@@ -28,8 +28,8 @@ class ViTBlock(CheckpointModule):
                  checkpoint: bool = False,
                  init_method: str = 'torch'):
         super().__init__(checkpoint)
-        self.norm1 = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
-        self.attn = ViTSelfAttention(dim=dim,
+        self.norm1 = col_nn.LayerNorm(normalized_shape=hidden_size, eps=layernorm_epsilon, dtype=dtype)
+        self.attn = ViTSelfAttention(hidden_size=hidden_size,
                                      num_heads=num_heads,
                                      attention_dropout=attention_dropout,
                                      dropout=dropout,
@@ -37,8 +37,8 @@ class ViTBlock(CheckpointModule):
                                      dtype=dtype,
                                      init_method=init_method)
         self.drop_path = col_nn.DropPath(drop_path) if drop_path > 0. else nn.Identity()
-        self.norm2 = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
-        self.mlp = ViTMLP(dim=dim,
+        self.norm2 = col_nn.LayerNorm(normalized_shape=hidden_size, eps=layernorm_epsilon, dtype=dtype)
+        self.mlp = ViTMLP(hidden_size=hidden_size,
                           mlp_ratio=mlp_ratio,
                           activation=activation,
                           dropout=dropout,

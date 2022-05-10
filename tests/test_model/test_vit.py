@@ -21,7 +21,7 @@ def run_vit(data, img_size, patch_size, in_chans, hidden_size, num_heads):
     model = VisionTransformer(img_size=img_size,
                               patch_size=patch_size,
                               in_chans=in_chans,
-                              dim=hidden_size,
+                              hidden_size=hidden_size,
                               num_heads=num_heads).cuda()
 
     # forward
@@ -43,5 +43,5 @@ def run_dist(rank, world_size, port, config):
 
 @pytest.mark.parametrize('parallel_config', [(4, '1d'), (4, '2d'), (4, '2.5d'), (8, '2.5d'), (8, '3d')])
 @rerun_if_address_is_in_use()
-def test_vit_embedding(parallel_config):
+def test_vit(parallel_config):
     run_with_parallel_config(*parallel_config, run_func=run_dist)

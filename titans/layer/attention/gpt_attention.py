@@ -13,7 +13,7 @@ from titans.decorator import no_support
 class GPTSelfAttention(nn.Module):
 
     def __init__(self,
-                 dim: int,
+                 hidden_size: int,
                  num_heads: int,
                  attention_dropout: float,
                  dropout: float,
@@ -22,8 +22,8 @@ class GPTSelfAttention(nn.Module):
                  dtype: dtype = None) -> None:
         super().__init__()
         self.fuse_scale_mask_softmax = fuse_scale_mask_softmax
-        self.attention_head_size = divide(dim, num_heads)
-        self.query_key_value = col_nn.Linear(dim, 3 * dim, dtype=dtype, bias=bias)
+        self.attention_head_size = divide(hidden_size, num_heads)
+        self.query_key_value = col_nn.Linear(hidden_size, 3 * hidden_size, dtype=dtype, bias=bias)
         if fuse_scale_mask_softmax:
             from colossalai.kernel import FusedScaleMaskSoftmax
             from colossalai.kernel.cuda_native.scaled_softmax import \
@@ -38,7 +38,7 @@ class GPTSelfAttention(nn.Module):
         else:
             self.softmax = nn.Softmax(dim=-1)
         self.attention_dropout = col_nn.Dropout(attention_dropout)
-        self.dense = col_nn.Linear(dim, dim, dtype=dtype, bias=True)
+        self.dense = col_nn.Linear(hidden_size, hidden_size, dtype=dtype, bias=True)
         self.dropout = col_nn.Dropout(dropout)
 
     def forward(self, x, attention_mask=None):
