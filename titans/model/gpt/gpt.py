@@ -187,7 +187,7 @@ def gpt2_36B(**kwargs):
     return _create_gpt_model(**model_kwargs)
 
 
-def gpt2_36B(**kwargs):
+def gpt2_40B(**kwargs):
     model_kwargs = dict(dim=8192, depth=50, num_heads=16, **kwargs)
     return _create_gpt_model(**model_kwargs)
 
