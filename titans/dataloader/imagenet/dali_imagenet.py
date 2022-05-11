@@ -4,10 +4,14 @@ import nvidia.dali.fn as fn
 import nvidia.dali.types as types
 import nvidia.dali.tfrecord as tfrec
 import torch
+import os
+import glob
 import numpy as np
 from titans.dataloader.utils import RandAugment
+from colossalai.core import global_context as gpc
+from colossalai.context import ParallelMode
 
-__all__ = ['DaliDataloaderWithRandAug', 'DaliDataloader']
+__all__ = ['DaliDataloaderWithRandAug', 'DaliDataloader', 'build_dali_imagenet']
 
 
 class DaliDataloaderWithRandAug(DALIClassificationIterator):
@@ -190,3 +194,63 @@ class DaliDataloader(DALIClassificationIterator):
         label = label.squeeze()
 
         return img, label
+
+
+def _build_dali_imagenet_train(root, rand_augment=False):
+    train_pat = os.path.join(root, 'train/*')
+    train_idx_pat = os.path.join(root, 'idx_files/train/*')
+    if rand_augment:
+        train_dataloader = DaliDataloaderWithRandAug(sorted(glob.glob(train_pat)),
+                                                     sorted(glob.glob(train_idx_pat)),
+                                                     batch_size=gpc.config.BATCH_SIZE,
+                                                     shard_id=gpc.get_local_rank(ParallelMode.DATA),
+                                                     num_shards=gpc.get_world_size(ParallelMode.DATA),
+                                                     gpu_aug=gpc.config.dali.gpu_aug,
+                                                     cuda=True,
+                                                     mixup_alpha=gpc.config.dali.mixup_alpha,
+                                                     randaug_num_layers=2)
+    else:
+        train_dataloader = DaliDataloader(
+            sorted(glob.glob(train_pat)),
+            sorted(glob.glob(train_idx_pat)),
+            batch_size=gpc.config.BATCH_SIZE,
+            shard_id=gpc.get_local_rank(ParallelMode.DATA),
+            num_shards=gpc.get_world_size(ParallelMode.DATA),
+            training=True,
+            gpu_aug=False,
+            cuda=False,
+        )
+    return train_dataloader
+
+
+def _build_dali_imagenet_test(root, rand_augment=False):
+    val_pat = os.path.join(root, 'validation/*')
+    val_idx_pat = os.path.join(root, 'idx_files/validation/*')
+    if rand_augment:
+        test_dataloader = DaliDataloaderWithRandAug(sorted(glob.glob(val_pat)),
+                                                    sorted(glob.glob(val_idx_pat)),
+                                                    batch_size=gpc.config.BATCH_SIZE,
+                                                    shard_id=gpc.get_local_rank(ParallelMode.DATA),
+                                                    num_shards=gpc.get_world_size(ParallelMode.DATA),
+                                                    training=False,
+                                                    gpu_aug=False,
+                                                    cuda=True,
+                                                    mixup_alpha=gpc.config.dali.mixup_alpha)
+    else:
+        test_dataloader = DaliDataloader(
+            sorted(glob.glob(val_pat)),
+            sorted(glob.glob(val_idx_pat)),
+            batch_size=gpc.config.BATCH_SIZE,
+            shard_id=gpc.get_local_rank(ParallelMode.DATA),
+            num_shards=gpc.get_world_size(ParallelMode.DATA),
+            training=False,
+            gpu_aug=False,
+            cuda=False,
+        )
+    return test_dataloader
+
+
+def build_dali_imagenet(root, rand_augment=False):
+    train_dataloader = _build_dali_imagenet_train(root, rand_augment=rand_augment)
+    test_dataloader = _build_dali_imagenet_test(root, rand_augment=rand_augment)
+    return train_dataloader, test_dataloader
