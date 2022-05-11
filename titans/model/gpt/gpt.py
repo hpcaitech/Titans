@@ -72,7 +72,7 @@ class GPT(nn.Module):
             dim=dim,
             vocab_size=vocab_size,
             embedding_layer=self.embed,
-        #word_embeeding_weight=self.embed.word_embedding_weight,
+            # word_embeeding_weight=self.embed.word_embedding_weight,
             dtype=dtype)
 
     def forward(self, input_ids, attention_mask=None):
@@ -122,8 +122,73 @@ def gpt2_xl(**kwargs):
     return _create_gpt_model(**model_kwargs)
 
 
+def gpt2_2B(**kwargs):
+    model_kwargs = dict(dim=2048, depth=40, num_heads=16, **kwargs)
+    return _create_gpt_model(**model_kwargs)
+
+
+def gpt2_3B(**kwargs):
+    model_kwargs = dict(dim=2304, depth=48, num_heads=16, **kwargs)
+    return _create_gpt_model(**model_kwargs)
+
+
+def gpt2_4B(**kwargs):
+    model_kwargs = dict(dim=2304, depth=64, num_heads=16, **kwargs)
+    return _create_gpt_model(**model_kwargs)
+
+
+def gpt2_6B(**kwargs):
+    model_kwargs = dict(dim=4096, depth=30, num_heads=16, **kwargs)
+    return _create_gpt_model(**model_kwargs)
+
+
 def gpt2_8B(**kwargs):
     model_kwargs = dict(dim=3072, depth=72, num_heads=24, **kwargs)
+    return _create_gpt_model(**model_kwargs)
+
+
+def gpt2_12B(**kwargs):
+    model_kwargs = dict(dim=4096, depth=60, num_heads=16, **kwargs)
+    return _create_gpt_model(**model_kwargs)
+
+
+def gpt2_15B(**kwargs):
+    model_kwargs = dict(dim=4096, depth=78, num_heads=16, **kwargs)
+    return _create_gpt_model(**model_kwargs)
+
+
+def gpt2_18B(**kwargs):
+    model_kwargs = dict(dim=4096, depth=90, num_heads=16, **kwargs)
+    return _create_gpt_model(**model_kwargs)
+
+
+def gpt2_20B(**kwargs):
+    model_kwargs = dict(dim=8192, depth=25, num_heads=16, **kwargs)
+    return _create_gpt_model(**model_kwargs)
+
+
+def gpt2_24B(**kwargs):
+    model_kwargs = dict(dim=8192, depth=30, num_heads=16, **kwargs)
+    return _create_gpt_model(**model_kwargs)
+
+
+def gpt2_28B(**kwargs):
+    model_kwargs = dict(dim=8192, depth=35, num_heads=16, **kwargs)
+    return _create_gpt_model(**model_kwargs)
+
+
+def gpt2_32B(**kwargs):
+    model_kwargs = dict(dim=8192, depth=40, num_heads=16, **kwargs)
+    return _create_gpt_model(**model_kwargs)
+
+
+def gpt2_36B(**kwargs):
+    model_kwargs = dict(dim=8192, depth=45, num_heads=16, **kwargs)
+    return _create_gpt_model(**model_kwargs)
+
+
+def gpt2_36B(**kwargs):
+    model_kwargs = dict(dim=8192, depth=50, num_heads=16, **kwargs)
     return _create_gpt_model(**model_kwargs)
 
 
