@@ -1,10 +1,9 @@
 import os
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # ninja build does not work unless include_dirs are abs path
 this_dir = os.path.dirname(os.path.abspath(__file__))
-ext_modules = []
 
 
 def fetch_requirements(path):
@@ -25,7 +24,14 @@ def get_version():
 setup(
     name='titans',
     version=get_version(),
-    packages=['titans'],
+    packages=find_packages(exclude=(
+        'build',
+        'docker',
+        'tests',
+        'docs',
+        'examples',
+        '*.egg-info',
+    )),
     description='A collection of deep learning components built with Colossal-AI',
     long_description=fetch_readme(),
     long_description_content_type='text/markdown',

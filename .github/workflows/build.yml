@@ -28,4 +28,7 @@ jobs:
           pip install -r requirements/requirements-test.txt
       - name: Unit Testing
         run: |
+          mkdir tmp_test
+          mv tests ./tmp_test
+          cd ./tmp_test
           PYTHONPATH=$PWD pytest tests
