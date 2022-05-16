@@ -19,5 +19,7 @@ class GPTLMHead(nn.Module):
         return self.dense.weight
 
     def forward(self, x):
+        # the size of x before dense is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE)
+        # the size of x after dense is (BATCH_SIZE, SEQ_LEN, VOCAB_SIZE)
         x = self.dense(x)
         return x

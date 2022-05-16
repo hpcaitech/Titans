@@ -34,6 +34,10 @@ __all__ = [
 
 @no_support(['sp', 'moe'])
 class VisionTransformer(nn.Module):
+    """
+    ViT Model transformer with an image classification head on top (a linear layer on top of the final hidden state of
+    the [CLS] token) e.g. for ImageNet.
+    """
 
     def __init__(self,
                  img_size: int = 224,
@@ -92,10 +96,14 @@ class VisionTransformer(nn.Module):
                             init_method=init_method)
 
     def forward(self, x):
+        # the size of x is (BATCH_SIZE, IN_CHAN, IMAGE_SIZE, IMAGE_SIZE)
         x = self.embed(x)
+        # the size of x after embed layer is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE)
         for block in self.blocks:
             x = block(x)
+        # the size of x after block is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE)
         x = self.head(self.norm(x))
+        # the size of x is (BATCH_SIZE, NUM_CLASSES)
         return x
 
 

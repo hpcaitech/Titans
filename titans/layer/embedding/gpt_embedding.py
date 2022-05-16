@@ -34,6 +34,8 @@ class GPTEmbedding(nn.Module):
             bs = input_ids.size(0)
             position_ids = torch.arange(seq_length, dtype=torch.long, device=get_current_device()).unsqueeze(0)
             position_ids = position_ids.repeat(bs, 1)
+        # the size of input_ids is (BATCH_SIZE, SEQ_LEN)
+        # the size of x after word_embeddings is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE)
         x = self.word_embeddings(input_ids) + self.position_embeddings(position_ids)
         if self.tokentype_embeddings is not None and tokentype_ids is not None:
             x = x + self.tokentype_embeddings(tokentype_ids)

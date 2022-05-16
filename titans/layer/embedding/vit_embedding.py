@@ -6,6 +6,9 @@ from ..init_rules import init_rules
 
 
 class ViTEmbedding(nn.Module):
+    """
+    Construct the patch embeddings.
+    """
 
     def __init__(self,
                  img_size: int,
@@ -27,6 +30,8 @@ class ViTEmbedding(nn.Module):
         self.dropout = col_nn.Dropout(dropout)
 
     def forward(self, x):
+        # the size of x before embed is (BATCH_SIZE, IN_CHAN, IMAGE_SIZE, IMAGE_SIZE)
+        # the size of x after embedding is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE)
         x = self.patch_embed(x)
         x = self.dropout(x)
         return x

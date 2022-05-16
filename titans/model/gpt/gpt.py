@@ -23,6 +23,10 @@ __all__ = ['GPT', 'GPTLMLoss', 'gpt2_small', 'gpt2_medium', 'gpt2_large', 'gpt2_
 
 @no_support(['sp', 'moe'])
 class GPT(nn.Module):
+    """
+    The GPT2 Model transformer with a language modeling head on top (linear layer with weights tied to the input
+    embeddings).
+    """
 
     def __init__(self,
                  vocab_size: int = 50304,
@@ -72,11 +76,15 @@ class GPT(nn.Module):
             dim=dim,
             vocab_size=vocab_size,
             embedding_layer=self.embed,
-            # word_embeeding_weight=self.embed.word_embedding_weight,
+        # word_embeeding_weight=self.embed.word_embedding_weight,
             dtype=dtype)
 
     def forward(self, input_ids, attention_mask=None):
+
+        # the size of input_ids is (BATCH_SIZE, SEQ_LEN)
         x = self.embed(input_ids)
+        # the size of x after embed layer is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE)
+
         # We create a 3D attention mask from a 2D tensor mask.
         # Sizes are [batch_size, 1, 1, to_seq_length]
         # So we can broadcast to [batch_size, num_heads, from_seq_length, to_seq_length]
@@ -89,10 +97,12 @@ class GPT(nn.Module):
             attention_mask = attention_mask.to(dtype=x.dtype)    # fp16 compatibility
             attention_mask = (1.0 - attention_mask) * -10000.0
 
+        # the size of x in blocks is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE)
         for block in self.blocks:
             x, attention_mask = block(x, attention_mask)
 
         x = self.head(self.norm(x))
+        # the size of x is (BATCH_SIZE, SEQ_LEN, VOCAB_SIZE)
 
         return x
 

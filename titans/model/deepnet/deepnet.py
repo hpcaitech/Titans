@@ -23,6 +23,7 @@ __all__ = ['DeepNet', 'deepnet_small']
 
 @support_tp_pp_only()
 class DeepNet(nn.Module):
+    """The decoder-only DeepNet model is modified from the GPT model."""
 
     def __init__(self,
                  vocab_size: int = 50304,
@@ -71,7 +72,11 @@ class DeepNet(nn.Module):
         self.head = GPTLMHead(dim=dim, vocab_size=vocab_size, embedding_layer=self.embed, dtype=dtype)
 
     def forward(self, input_ids, attention_mask=None):
+
+        # the size of input_ids is (BATCH_SIZE, SEQ_LEN)
         x = self.embed(input_ids)
+        # the size of x after embed layer is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE)
+
         # We create a 3D attention mask from a 2D tensor mask.
         # Sizes are [batch_size, 1, 1, to_seq_length]
         # So we can broadcast to [batch_size, num_heads, from_seq_length, to_seq_length]
@@ -84,11 +89,12 @@ class DeepNet(nn.Module):
             attention_mask = attention_mask.to(dtype=x.dtype)    # fp16 compatibility
             attention_mask = (1.0 - attention_mask) * -10000.0
 
+        # the size of x in blocks is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE)
         for block in self.blocks:
             x, attention_mask = block(x, attention_mask)
 
         x = self.head(self.norm(x))
-
+        # the size of x is (BATCH_SIZE, SEQ_LEN, VOCAB_SIZE)
         return x
 
 
