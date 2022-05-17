@@ -37,6 +37,26 @@ class VisionTransformer(nn.Module):
     """
     ViT Model transformer with an image classification head on top (a linear layer on top of the final hidden state of
     the [CLS] token) e.g. for ImageNet.
+
+    Args:
+        img_size(int): The size of images, defaults to 224.
+        patch_size(int): The size of patches, defaults to 16.
+        in_chans(int): The size of input channels, defaults to 3.
+        num_classes(int): The number of target classes, defaults to 1000.
+        depth(int): The number of transformer layers, defaults to 12.
+        num_heads(int): The number of heads in transformer blocks, defaults to 12.
+        dim(int): Hidden size of the transformer blocks, defaults to 768.
+        mlp_ratio(int): The ratio used in mlp layer, defaults to 4.
+        attention_dropout(float): The ratio used to construct attention dropout modules, which indicates the percentage of parameters should be casted to zero, defaults to 0.1.
+        dropout(float): The ratio used to construct dropout modules, which indicates the percentage of parameters should be casted to zero, defaults to 0.1.
+        drop_path(float): The ratio used to construct drop_path modules, which indicates the percentage of branches should be casted to zero, defaults to 0..
+        layernorm_epsilon(float): The argument used to construct layernorm modules, defaults to 1e-6.
+        activation(Callable): The activation function used in model, defaults to nn.functional.gelu.
+        representation_size(int): The size of representation in head layer, defaults to None.
+        dtype (:class:`torch.dtype`): The dtype of parameters, defaults to None.
+        bias (bool): If set to ``False``, the layer will not learn an additive bias, defaults to ``True``.
+        checkpoint(bool): If set to "True", checkpoint feature will be activated to save memory, defaults to ``False``.
+        init_method(str): The initializing method used in layers, defaults to `torch`.
     """
 
     def __init__(self,
