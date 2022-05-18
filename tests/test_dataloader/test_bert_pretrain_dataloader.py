@@ -14,14 +14,14 @@ except:
     get_bert_pretrain_data_loader = None
 
 
-CONFIG = dict(
-    parallel=dict(
-        tensor=dict(size=2, mode='1d')
-    )
-)
-DATA_PATH = os.environ['PARQUET_PATH']
-
 def load_data(rank, world_size, port):
+    CONFIG = dict(
+        parallel=dict(
+        tensor=dict(size=2, mode='1d')
+        )
+    )
+    DATA_PATH = os.environ['PARQUET_PATH']
+
     colossalai.launch(config=CONFIG, rank=rank, world_size=world_size, port=port, host='localhost')
 
     dataloader = get_bert_pretrain_data_loader(
