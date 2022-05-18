@@ -32,9 +32,12 @@ class ViTMLP(nn.Module):
         self.dropout_2 = col_nn.Dropout(dropout)
 
     def forward(self, x):
+        # the size of x before dense_1 is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE)
+        # the size of x after dense_1 is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE*mlp_ratio)
         x = self.dense_1(x)
         x = self.activation(x)
         x = self.dropout_1(x)
+        # the size of x after dense_2 is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE)
         x = self.dense_2(x)
         x = self.dropout_2(x)
         return x
