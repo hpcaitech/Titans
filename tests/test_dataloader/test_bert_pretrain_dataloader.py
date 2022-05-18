@@ -26,7 +26,7 @@ def load_data(rank, world_size, port):
 
     dataloader = get_bert_pretrain_data_loader(
         path=DATA_PATH,
-        vocab_file='bert-large-uncased-vocab',
+        vocab_file='bert-large-uncased',
         local_rank=rank,
         process_group=gpc.get_group(ParallelMode.DATA),
         data_loader_kwargs={
