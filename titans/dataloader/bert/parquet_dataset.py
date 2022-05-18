@@ -167,16 +167,8 @@ class ParquetDataset(IterableDataset):
     self._init_rng_states(worker_rank, num_workers_per_rank)
 
     files = self._world_identical_sample(self._files, k=len(self._files))
-
-    # self._logger.to('node').warning('epoch = {}'.format(self._epoch))
-    # self._logger.to('worker').info(
-    #     '\n'.join(['files('] + ['  {}'.format(f) for f in files] + [')']))
-
     rank_files = files[self._rank::self._world_size]
     worker_files = rank_files[worker_rank::num_workers_per_rank]
-    # self._logger.to('worker').info(
-    #     '\n'.join(['worker_files('] + ['  {}'.format(f) for f in worker_files] +
-    #               [')']))
 
     sb = ShuffleBuffer(
         worker_files,
