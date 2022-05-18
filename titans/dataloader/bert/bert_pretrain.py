@@ -7,12 +7,16 @@ import os
 import torch
 import transformers
 
-from lddl.utils import get_all_parquets_under, get_all_bin_ids, get_file_paths_for_bin_id
-from lddl.torch.dataloader import DataLoader
-from .parquet_dataset import ParquetDataset
-from lddl.torch.bert import _decode_record_batch, _to_encoded_inputs, _mask_tokens, BertPretrainBinned
-from lddl.torch.log import DatasetLogger
-from lddl.torch.utils import get_node_rank, get_nproc_per_node
+try:
+  from lddl.utils import get_all_parquets_under, get_all_bin_ids, get_file_paths_for_bin_id
+  from lddl.torch.dataloader import DataLoader
+  from .parquet_dataset import ParquetDataset
+  from lddl.torch.bert import _decode_record_batch, _to_encoded_inputs, _mask_tokens, BertPretrainBinned
+  from lddl.torch.log import DatasetLogger
+  from lddl.torch.utils import get_node_rank, get_nproc_per_node
+except ImportError:
+  raise ImportError('lddl is required for BERT pretraining but not found, '
+    'you can install lddl by pip install git+https://github.com/NVIDIA/DeepLearningExamples.git#subdirectory=Tools/lddl')
 
 
 class BertPretrainDataset(ParquetDataset):

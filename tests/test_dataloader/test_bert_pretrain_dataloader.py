@@ -6,7 +6,12 @@ from colossalai.context.parallel_mode import ParallelMode
 from colossalai.utils import free_port
 from colossalai.core import global_context as gpc
 from functools import partial
-from titans.dataloader.bert import get_bert_pretrain_data_loader
+
+try:
+    from titans.dataloader.bert import get_bert_pretrain_data_loader
+except:
+    # to bypass pytest
+    get_bert_pretrain_data_loader = None
 
 
 CONFIG = dict(
