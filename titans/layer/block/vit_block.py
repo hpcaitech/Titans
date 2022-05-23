@@ -47,6 +47,9 @@ class ViTBlock(CheckpointModule):
                           init_method=init_method)
 
     def _forward(self, x):
+        # the size of x is (BATCH_SZIE, SEQ_LEN, HIDDEN_SIZE)
         x = x + self.drop_path(self.attn(self.norm1(x)))
+        # the size of x after attn is (BATCH_SZIE, SEQ_LEN, HIDDEN_SIZE)
         x = x + self.drop_path(self.mlp(self.norm2(x)))
+        # the size of x after mlp is (BATCH_SZIE, SEQ_LEN, HIDDEN_SIZE)
         return x

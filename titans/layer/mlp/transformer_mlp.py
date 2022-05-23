@@ -47,9 +47,11 @@ class TransformerMLP(nn.Module):
             self.dropout = None
 
     def forward(self, x: Tensor) -> Tensor:
+        # the size of x is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE)
+        # the size of intermediate_activate is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE*mlp_ratio)
         intermediate_activate = self.linear_1(x)
         intermediate_activate = self.activation(intermediate_activate)
-
+        # the size of output is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE)
         output = self.linear_2(intermediate_activate)
 
         if self.dropout:

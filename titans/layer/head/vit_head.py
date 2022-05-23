@@ -31,8 +31,12 @@ class ViTHead(nn.Module):
                                        **init_rules[init_method]['head'])
 
     def forward(self, x):
+        # the size of x is (BATCH_SIZE, SEQ_LEN, HIDDEN_SIZE)
         x = x[:, 0]
+        # the size of x is (BATCH_SIZE, HIDDEN_SIZE)
         if self.representation is not None:
             x = self.representation(x)
+            # the size of x after representation is (BATCH_SIZE, REPRESENTATION_SIZE)
         x = self.dense(x)
+        # the size of x after dense is (BATCH_SIZE, NUM_CLASSES)
         return x
