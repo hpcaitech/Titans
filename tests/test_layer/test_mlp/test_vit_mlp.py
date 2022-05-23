@@ -3,7 +3,7 @@ import pytest
 import torch
 import torch.nn.functional as F
 
-from titans.layer.mlp import TransformerMLP, ViTMLP, DetrMLP
+from titans.layer.mlp import ViTMLP
 from titans.utils import split_data_for_tensor_parallel
 from colossalai.global_variables import tensor_parallel_env as tp_env
 from colossalai.testing import rerun_if_address_is_in_use

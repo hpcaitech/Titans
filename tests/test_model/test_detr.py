@@ -46,7 +46,7 @@ def run_dist(rank, world_size, port, config):
     run_detr(data, 224, PATCH_SIZE, IN_CHANS, HIDDEN_SIZE, NUM_HEADS, NUM_ENCODER_LAYER, NUM_DECODER_LAYER)
 
 
-@pytest.mark.parametrize('parallel_config', [(2, '1d')])
+@pytest.mark.parametrize('parallel_config', [(4, '1d')])
 @rerun_if_address_is_in_use()
 def test_detr(parallel_config):
     run_with_parallel_config(*parallel_config, run_func=run_dist)

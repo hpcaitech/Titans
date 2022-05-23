@@ -3,7 +3,7 @@ import pytest
 import torch
 import torch.nn.functional as F
 
-from titans.layer.mlp import TransformerMLP, ViTMLP, DetrMLP
+from titans.layer.mlp import DeTrMLP
 from titans.utils import split_data_for_tensor_parallel
 from colossalai.global_variables import tensor_parallel_env as tp_env
 from colossalai.testing import rerun_if_address_is_in_use
@@ -17,7 +17,7 @@ HIDDEN_SIZE = 32
 def run_detr_mlp(data, hidden_size):
 
     #build model
-    model = DetrMLP(input_dim=hidden_size, hidden_size=4*hidden_size, output_dim=hidden_size, num_layers=1).cuda()
+    model = DeTrMLP(input_dim=hidden_size, hidden_size=4*hidden_size, output_dim=hidden_size, num_layers=1).cuda()
 
     # forward
     out = model(data)

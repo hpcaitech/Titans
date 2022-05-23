@@ -47,9 +47,6 @@ class ViTBlock(CheckpointModule):
                           init_method=init_method)
 
     def _forward(self, x):
-        print('x',x.size())
-        print('hidden_size',self.norm1(x).size())
-        assert False
         x = x + self.drop_path(self.attn(self.norm1(x)))
         x = x + self.drop_path(self.mlp(self.norm2(x)))
         return x

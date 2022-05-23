@@ -63,6 +63,7 @@ class DeTrCrossAttention(nn.Module):
         x = x.transpose(1, 2)
         new_context_layer_shape = x.size()[:-2] + (all_head_size,)
         x = x.reshape(new_context_layer_shape)
+        x = x.transpose(0, 1)
 
         x = self.dense(x)
         x = self.dropout(x)
