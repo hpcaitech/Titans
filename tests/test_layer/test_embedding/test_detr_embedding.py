@@ -1,23 +1,27 @@
 import colossalai
 import pytest
 import torch
-import torch.nn.functional as F
 
-from titans.layer.mlp import TransformerMLP, ViTMLP, DetrMLP
-from titans.utils import split_data_for_tensor_parallel
+from titans.layer.embedding import DeTrEmbedding
 from colossalai.global_variables import tensor_parallel_env as tp_env
 from colossalai.testing import rerun_if_address_is_in_use
 from tests.utils import run_with_parallel_config
 
 BATCH_SIZE = 4
-SEQ_LENGTH = 16
+IMAGE_SIZE = 224
+PATCH_SIZE = 16
+IN_CHANS = 3
 HIDDEN_SIZE = 32
 
 
-def run_transformer_mlp(data, hidden_size):
+def run_detr_embed(data, img_size, patch_size, in_chans, hidden_size):
 
     #build model
-    model = TransformerMLP(hidden_size=hidden_size, mlp_ratio=4).cuda()
+    model = DeTrEmbedding(img_size=img_size,
+                         patch_size=patch_size,
+                         in_chans=in_chans,
+                         embedding_dim=hidden_size,
+                         dropout=0.0).cuda()
 
     # forward
     out = model(data)
@@ -32,12 +36,11 @@ def run_dist(rank, world_size, port, config):
     if tp_env.mode == 'sequence':
         tp_env.mode = None
 
-    data = torch.rand(BATCH_SIZE, SEQ_LENGTH, HIDDEN_SIZE).cuda()
-    data = split_data_for_tensor_parallel(data)
-    run_transformer_mlp(data, HIDDEN_SIZE)
+    data = torch.rand(BATCH_SIZE, IN_CHANS, IMAGE_SIZE, IMAGE_SIZE).cuda()
+    run_detr_embed(data, IMAGE_SIZE, PATCH_SIZE, IN_CHANS, HIDDEN_SIZE)
 
 
 @pytest.mark.parametrize('parallel_config', [(4, '1d'), (4, '2d'), (4, '2.5d'), (8, '2.5d'), (8, '3d')])
 @rerun_if_address_is_in_use()
-def test_transformer_mlp(parallel_config):
+def test_detr_embedding(parallel_config):
     run_with_parallel_config(*parallel_config, run_func=run_dist)

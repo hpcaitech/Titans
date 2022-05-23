@@ -14,10 +14,10 @@ SEQ_LENGTH = 16
 HIDDEN_SIZE = 32
 
 
-def run_transformer_mlp(data, hidden_size):
+def run_vit_mlp(data, hidden_size):
 
     #build model
-    model = TransformerMLP(hidden_size=hidden_size, mlp_ratio=4).cuda()
+    model = ViTMLP(hidden_size=hidden_size, mlp_ratio=4, activation=F.gelu, dropout=0.0).cuda()
 
     # forward
     out = model(data)
@@ -34,8 +34,8 @@ def run_dist(rank, world_size, port, config):
 
     data = torch.rand(BATCH_SIZE, SEQ_LENGTH, HIDDEN_SIZE).cuda()
     data = split_data_for_tensor_parallel(data)
-    run_transformer_mlp(data, HIDDEN_SIZE)
-
+    run_vit_mlp(data, HIDDEN_SIZE)
+    
 
 @pytest.mark.parametrize('parallel_config', [(4, '1d'), (4, '2d'), (4, '2.5d'), (8, '2.5d'), (8, '3d')])
 @rerun_if_address_is_in_use()

@@ -4,7 +4,7 @@ from torch import nn
 from colossalai import nn as col_nn
 
 
-class DetrMLP(nn.Module):
+class DeTrMLP(nn.Module):
     """ Very simple multi-layer perceptron (also called FFN)"""
 
     def __init__(self, input_dim, hidden_size, output_dim, num_layers):

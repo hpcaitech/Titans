@@ -1,5 +1,4 @@
 import colossalai
-import pytest
 import torch
 
 from titans.model.moe import MOEGPT, ViTMoE, Widenet

@@ -14,10 +14,10 @@ SEQ_LENGTH = 16
 HIDDEN_SIZE = 32
 
 
-def run_transformer_mlp(data, hidden_size):
+def run_detr_mlp(data, hidden_size):
 
     #build model
-    model = TransformerMLP(hidden_size=hidden_size, mlp_ratio=4).cuda()
+    model = DetrMLP(input_dim=hidden_size, hidden_size=4*hidden_size, output_dim=hidden_size, num_layers=1).cuda()
 
     # forward
     out = model(data)
@@ -34,7 +34,7 @@ def run_dist(rank, world_size, port, config):
 
     data = torch.rand(BATCH_SIZE, SEQ_LENGTH, HIDDEN_SIZE).cuda()
     data = split_data_for_tensor_parallel(data)
-    run_transformer_mlp(data, HIDDEN_SIZE)
+    run_detr_mlp(data, HIDDEN_SIZE)
 
 
 @pytest.mark.parametrize('parallel_config', [(4, '1d'), (4, '2d'), (4, '2.5d'), (8, '2.5d'), (8, '3d')])

@@ -1,56 +1,140 @@
-"""
-DETR model and criterion classes.
-"""
+import math
+from typing import Callable
+
 import torch
-import torch.nn.functional as F
-from torch import nn
-
-from util.misc import NestedTensor, nested_tensor_from_tensor_list
 from colossalai import nn as col_nn
-from titans.layer.mlp import DetrMLP
+from colossalai.nn.layer.utils import CheckpointModule
+from torch import dtype, nn
+from torchvision.models import resnet50
+
+from titans.layer.embedding import ViTEmbedding
+# from titans.layer.head import DeTrHead
+from titans.layer.mlp import DeTrMLP
+from titans.layer.block import DeTrEncoder, DeTrDecoder
+from titans.decorator import no_support
+
+__all__ = [
+    'DeTr',
+    'detr_1',
+]
 
 
-class DETR(nn.Module):
-    """ This is the DETR module that performs object detection """
+@no_support(['sp', 'moe'])
+class DeTr(nn.Module):
 
-    def __init__(self, backbone, transformer, num_classes, num_queries, aux_loss=False):
-        """ Initializes the model.
-        Parameters:
-            backbone: torch module of the backbone to be used. See backbone.py
-            transformer: torch module of the transformer architecture. See transformer.py
-            num_classes: number of object classes
-            num_queries: number of object queries, ie detection slot. This is the maximal number of objects
-                         DETR can detect in a single image. For COCO, we recommend 100 queries.
-            aux_loss: True if auxiliary decoding losses (loss at each decoder layer) are to be used.
-        """
+    def __init__(self,
+                 img_size: int = 224,
+                 patch_size: int = 16,
+                 in_chans: int = 3,
+                 num_classes: int = 91,
+                 num_encoder_layer: int = 6,
+                 num_decoder_layer: int = 6,
+                 num_heads: int = 12,
+                 num_queries: int = 100,
+                 hidden_size: int = 256,
+                 mlp_ratio: int = 4,
+                 attention_dropout: float = 0.,
+                 dropout: float = 0.1,
+                 drop_path: float = 0.,
+                 layernorm_epsilon: float = 1e-6,
+                 activation: Callable = nn.functional.gelu,
+                 representation_size: int = None,
+                 dtype: dtype = None,
+                 bias: bool = True,
+                 checkpoint: bool = False,
+                 init_method: str = 'torch'):
         super().__init__()
-        self.num_queries = num_queries
-        self.transformer = transformer
-        hidden_dim = transformer.d_model
-        self.class_embed = col_nn.Linear(hidden_dim, num_classes + 1)
-        self.bbox_embed = DetrMLP(hidden_dim, hidden_dim, 4, 3)
-        self.query_embed = col_nn.Embedding(num_queries, hidden_dim)
-        self.input_proj = nn.Conv2d(backbone.num_channels, hidden_dim, kernel_size=1)
-        self.backbone = backbone
-        self.aux_loss = aux_loss
 
-    def forward(self, samples: NestedTensor):
-        if isinstance(samples, (list, torch.Tensor)):
-            samples = nested_tensor_from_tensor_list(samples)
-        features, pos = self.backbone(samples)
+        # self.embed = ViTEmbedding(img_size=img_size,
+        #                           patch_size=patch_size,
+        #                           in_chans=in_chans,
+        #                           embedding_dim=hidden_size,
+        #                           dropout=dropout,
+        #                           dtype=dtype,
+        #                           init_method=init_method)
 
-        src, mask = features[-1].decompose()
-        assert mask is not None
+        self.backbone = nn.Sequential(*list(resnet50(pretrained=True).children())[:-2])
+        self.conv = nn.Conv2d(2048, hidden_size, 1)
 
-        hs = self.transformer(self.input_proj(src), mask, self.query_embed.weight, pos[-1])
+        # stochastic depth decay rule
+        dpr1 = [x.item() for x in torch.linspace(0, drop_path, num_encoder_layer)]
+        self.blocks1 = nn.ModuleList([
+            DeTrEncoder(
+                hidden_size=hidden_size,
+                num_heads=num_heads,
+                mlp_ratio=mlp_ratio,
+                attention_dropout=attention_dropout,
+                dropout=dropout,
+                drop_path=dpr1[i],
+                activation=activation,
+                dtype=dtype,
+                bias=bias,
+                checkpoint=checkpoint,
+                init_method=init_method,
+            ) for i in range(num_encoder_layer)
+        ])
 
-        outputs_class = self.class_embed(hs)
-        outputs_coord = self.bbox_embed(hs).sigmoid()
+        dpr2 = [x.item() for x in torch.linspace(0, drop_path, num_decoder_layer)]
+        self.blocks2 = nn.ModuleList([
+            DeTrDecoder(
+                hidden_size=hidden_size,
+                num_heads=num_heads,
+                mlp_ratio=mlp_ratio,
+                attention_dropout=attention_dropout,
+                dropout=dropout,
+                drop_path=dpr2[i],
+                activation=activation,
+                dtype=dtype,
+                bias=bias,
+                checkpoint=checkpoint,
+                init_method=init_method,
+            ) for i in range(num_decoder_layer)
+        ])
+
+        self.norm = col_nn.LayerNorm(normalized_shape=hidden_size, eps=layernorm_epsilon, dtype=dtype)
+        
+        self.class_embed = nn.Linear(hidden_size, num_classes + 1)
+        self.bbox_embed = DeTrMLP(hidden_size, hidden_size, 4, 3)
+        self.query_embed = nn.Embedding(num_queries, hidden_size)
+
+        self.query_pos = nn.Parameter(torch.rand(100, hidden_size))
+        self.row_embed = nn.Parameter(torch.rand(50, hidden_size // 2))
+        self.col_embed = nn.Parameter(torch.rand(50, hidden_size // 2))
+
+    def forward(self, x):
+        x = self.backbone(x)
+        h = self.conv(x)
+        H, W = h.shape[-2:]
+        pos = torch.cat([
+            self.col_embed[:W].unsqueeze(0).repeat(H, 1, 1),
+            self.row_embed[:H].unsqueeze(1).repeat(1, W, 1),
+        ], dim=-1).flatten(0, 1).unsqueeze(1)
+
+        for block in self.blocks1:
+            memory = block(pos + h.flatten(2).permute(2, 0, 1))
+        print('memory',memory.size())
+        print('self.query_pos.unsqueeze(1)',self.query_pos.unsqueeze(1).size())
+        for block in self.blocks2:
+            x = block(self.query_pos.unsqueeze(1), memory)
+
+        x = self.norm(x)
+        outputs_class = self.class_embed(x)
+        outputs_coord = self.bbox_embed(x).sigmoid()
         out = {'pred_logits': outputs_class[-1], 'pred_boxes': outputs_coord[-1]}
-        if self.aux_loss:
-            out['aux_outputs'] = self._set_aux_loss(outputs_class, outputs_coord)
-        return out
+        # if self.aux_loss:
+        #     out['aux_outputs'] = self._set_aux_loss(outputs_class, outputs_coord)
+        # return out # not dict 
+        return outputs_class # temp
+ 
+        
 
-    @torch.jit.unused
-    def _set_aux_loss(self, outputs_class, outputs_coord):
-        return [{'pred_logits': a, 'pred_boxes': b} for a, b in zip(outputs_class[:-1], outputs_coord[:-1])]
+
+def _create_detr_model(**model_kwargs):
+    model = DeTr(**model_kwargs)
+    return model
+
+
+def detr_1(**kwargs):
+    model_kwargs = dict(img_size=32, patch_size=4, hidden_size=256, depth=7, num_heads=4, mlp_ratio=2, num_classes=10, **kwargs)
+    return _create_detr_model(**model_kwargs)
+
