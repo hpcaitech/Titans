@@ -1,4 +1,4 @@
-from . import detr
+# from . import detr
 from . import gpt
 from . import knowledge_graph_embedding
 from . import moe

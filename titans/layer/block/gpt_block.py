@@ -16,7 +16,7 @@ from titans.layer.mlp import TransformerMLP
 class GPTBlock(CheckpointModule):
 
     def __init__(self,
-                 dim: int,
+                 hidden_size: int,
                  num_heads: int,
                  mlp_ratio: float,
                  activation: Callable,
@@ -31,18 +31,18 @@ class GPTBlock(CheckpointModule):
                  activation_offload: bool = False):
         super().__init__(checkpoint, activation_offload)
         self.apply_post_layernorm = apply_post_layernorm
-        self.norm1 = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
-        self.attn = GPTSelfAttention(dim=dim,
+        self.norm1 = col_nn.LayerNorm(normalized_shape=hidden_size, eps=layernorm_epsilon, dtype=dtype)
+        self.attn = GPTSelfAttention(hidden_size=hidden_size,
                                      num_heads=num_heads,
                                      attention_dropout=attention_dropout,
                                      dropout=dropout,
                                      bias=bias,
                                      fuse_scale_mask_softmax=fuse_scale_mask_softmax,
                                      dtype=dtype)
-        self.norm2 = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
-        self.mlp = TransformerMLP(hidden_size=dim,
+        self.norm2 = col_nn.LayerNorm(normalized_shape=hidden_size, eps=layernorm_epsilon, dtype=dtype)
+        self.mlp = TransformerMLP(hidden_size=hidden_size,
                                   mlp_ratio=mlp_ratio,
-                                  act_func=activation,
+                                  activation=activation,
                                   dropout_prob=dropout,
                                   dtype=dtype,
                                   bias=bias)
@@ -71,7 +71,7 @@ class MOEGPTBlock(CheckpointModule):
 
     def __init__(self,
                  num_experts: int,
-                 dim: int,
+                 hidden_size: int,
                  num_heads: int,
                  mlp_ratio: float,
                  activation: Callable,
@@ -88,24 +88,24 @@ class MOEGPTBlock(CheckpointModule):
                  checkpoint: bool = False):
         super().__init__(checkpoint)
         self.apply_post_layernorm = apply_post_layernorm
-        self.norm1 = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
-        self.attn = GPTSelfAttention(dim=dim,
+        self.norm1 = col_nn.LayerNorm(normalized_shape=hidden_size, eps=layernorm_epsilon, dtype=dtype)
+        self.attn = GPTSelfAttention(hidden_size=hidden_size,
                                      num_heads=num_heads,
                                      attention_dropout=attention_dropout,
                                      dropout=dropout,
                                      bias=bias,
                                      fuse_scale_mask_softmax=fuse_scale_mask_softmax,
                                      dtype=dtype)
-        self.norm2 = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
+        self.norm2 = col_nn.LayerNorm(normalized_shape=hidden_size, eps=layernorm_epsilon, dtype=dtype)
 
-        mpl_factory_dict = dict(dim=dim,
+        mpl_factory_dict = dict(hidden_size=hidden_size,
                                 mlp_ratio=mlp_ratio,
                                 activation=activation,
-                                dropout=dropout,
+                                # dropout=dropout,
                                 dtype=dtype,
                                 bias=bias)
 
-        self.mlp = MoeModule(dim_model=dim,
+        self.mlp = MoeModule(dim_model=hidden_size,
                              num_experts=num_experts,
                              top_k=1,
                              capacity_factor_train=capacity_factor_train,

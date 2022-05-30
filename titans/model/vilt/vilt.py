@@ -22,7 +22,7 @@ class ViLT(nn.Module):
         num_classes: int = 1000,
         depth: int = 12,
         num_heads: int = 12,
-        dim: int = 768,
+        hidden_size: int = 768,
         mlp_ratio: int = 4,
         attention_dropout: float = 0.,
         dropout: float = 0.1,
@@ -72,7 +72,7 @@ class ViLT(nn.Module):
         self.vis_embedding = ViTEmbedding(img_size=img_size,
                                           patch_size=patch_size,
                                           in_chans=in_chans,
-                                          embedding_dim=dim,
+                                          embedding_dim=hidden_size,
                                           dropout=dropout,
                                           dtype=dtype,
                                           init_method=init_method)
@@ -81,7 +81,7 @@ class ViLT(nn.Module):
         dpr = [x.item() for x in torch.linspace(0, drop_path, depth)]
         blocks = [
             ViTBlock(
-                dim=dim,
+                hidden_size=hidden_size,
                 num_heads=num_heads,
                 mlp_ratio=mlp_ratio,
                 attention_dropout=attention_dropout,
@@ -94,7 +94,7 @@ class ViLT(nn.Module):
                 init_method=init_method,
             ) for i in range(depth)
         ]
-        norm = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
+        norm = col_nn.LayerNorm(normalized_shape=hidden_size, eps=layernorm_epsilon, dtype=dtype)
 
         if self.last_stage:
             self.mlm_score = heads.MLMHead(bert_config)

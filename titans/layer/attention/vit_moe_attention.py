@@ -11,7 +11,7 @@ class SelfAttentionForMoe(nn.Module):
     """
 
     def __init__(self,
-                 d_model: int,
+                 hidden_size: int,
                  n_heads: int,
                  d_kv: int,
                  attention_drop: float = 0,
@@ -24,10 +24,10 @@ class SelfAttentionForMoe(nn.Module):
         self.d_kv = d_kv
         self.scale = 1.0 / math.sqrt(self.d_kv)
 
-        self.dense1 = nn.Linear(d_model, 3 * n_heads * d_kv, bias, device=get_current_device())
+        self.dense1 = nn.Linear(hidden_size, 3 * n_heads * d_kv, bias, device=get_current_device())
         self.softmax = nn.Softmax(dim=-1)
         self.atten_drop = nn.Dropout(attention_drop) if dropout1 is None else dropout1
-        self.dense2 = nn.Linear(n_heads * d_kv, d_model, device=get_current_device())
+        self.dense2 = nn.Linear(n_heads * d_kv, hidden_size, device=get_current_device())
         self.dropout = nn.Dropout(drop_rate) if dropout2 is None else dropout2
 
     def forward(self, x):

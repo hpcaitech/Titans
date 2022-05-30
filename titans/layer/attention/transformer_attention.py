@@ -26,14 +26,14 @@ class TransformerSelfAttention(nn.Module):
 @no_support(['sp'])
 class TransformerMultiHeadAttention(nn.Module):
 
-    def __init__(self, d_model, num_hiddens, num_heads, dropout, bias=False):
+    def __init__(self, hidden_size, num_hiddens, num_heads, dropout, bias=False):
         super(TransformerMultiHeadAttention, self).__init__()
         self.num_heads = num_heads
         self.attention = SelfAttention(dropout)
-        self.W_q = col_nn.Linear(d_model, num_hiddens, bias=bias)
-        self.W_k = col_nn.Linear(d_model, num_hiddens, bias=bias)
-        self.W_v = col_nn.Linear(d_model, num_hiddens, bias=bias)
-        self.W_o = col_nn.Linear(num_hiddens, d_model, bias=bias)
+        self.W_q = col_nn.Linear(hidden_size, num_hiddens, bias=bias)
+        self.W_k = col_nn.Linear(hidden_size, num_hiddens, bias=bias)
+        self.W_v = col_nn.Linear(hidden_size, num_hiddens, bias=bias)
+        self.W_o = col_nn.Linear(num_hiddens, hidden_size, bias=bias)
 
     def forward(self, queries, keys, values):
         queries = transpose_qkv(self.W_q(queries), self.num_heads)

@@ -1,4 +1,5 @@
 from .gpt_attention import GPTSelfAttention
+from .detr_attention import DeTrCrossAttention
 from .vit_attention import ViTSelfAttention
 from .vit_moe_attention import SelfAttentionForMoe
 from .transformer_attention import TransformerSelfAttention, TransformerMultiHeadAttention

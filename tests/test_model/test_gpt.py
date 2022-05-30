@@ -17,7 +17,7 @@ VOCAB_SIZE = 50304
 def run_gpt(data, hidden_size, num_heads):
 
     #build model
-    model = GPT(dim=hidden_size, num_heads=num_heads).cuda()
+    model = GPT(hidden_size=hidden_size, num_heads=num_heads).cuda()
 
     # forward
     out = model(data)

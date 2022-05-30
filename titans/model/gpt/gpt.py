@@ -51,7 +51,7 @@ class GPT(nn.Module):
     def __init__(self,
                  vocab_size: int = 50304,
                  max_position_embeddings: int = 1024,
-                 dim: int = 768,
+                 hidden_size: int = 768,
                  num_heads: int = 12,
                  depth: int = 12,
                  mlp_ratio: float = 4.0,
@@ -68,14 +68,14 @@ class GPT(nn.Module):
                  checkpoint: bool = False,
                  activation_offload: bool = False) -> None:
         super().__init__()
-        self.embed = GPTEmbedding(embedding_dim=dim,
+        self.embed = GPTEmbedding(embedding_dim=hidden_size,
                                   vocab_size=vocab_size,
                                   max_position_embeddings=max_position_embeddings,
                                   padding_idx=padding_idx,
                                   dropout=embedding_dropout,
                                   dtype=dtype)
         self.blocks = nn.ModuleList([
-            GPTBlock(dim=dim,
+            GPTBlock(hidden_size=hidden_size,
                      num_heads=num_heads,
                      mlp_ratio=mlp_ratio,
                      activation=activation,
@@ -90,10 +90,10 @@ class GPT(nn.Module):
                      activation_offload=activation_offload) for _ in range(depth)
         ])
 
-        self.norm = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
+        self.norm = col_nn.LayerNorm(normalized_shape=hidden_size, eps=layernorm_epsilon, dtype=dtype)
 
         self.head = GPTLMHead(
-            dim=dim,
+            hidden_size=hidden_size,
             vocab_size=vocab_size,
             embedding_layer=self.embed,
         # word_embeeding_weight=self.embed.word_embedding_weight,
@@ -133,22 +133,22 @@ def _create_gpt_model(**model_kwargs):
 
 
 def gpt2_small(**kwargs):
-    model_kwargs = dict(dim=768, depth=12, num_heads=12, **kwargs)
+    model_kwargs = dict(hidden_size=768, depth=12, num_heads=12, **kwargs)
     return _create_gpt_model(**model_kwargs)
 
 
 def gpt2_medium(**kwargs):
-    model_kwargs = dict(dim=1024, depth=24, num_heads=8, **kwargs)
+    model_kwargs = dict(hidden_size=1024, depth=24, num_heads=8, **kwargs)
     return _create_gpt_model(**model_kwargs)
 
 
 def gpt2_large(**kwargs):
-    model_kwargs = dict(dim=1536, depth=36, num_heads=12, **kwargs)
+    model_kwargs = dict(hidden_size=1536, depth=36, num_heads=12, **kwargs)
     return _create_gpt_model(**model_kwargs)
 
 
 def gpt2_xl(**kwargs):
-    model_kwargs = dict(dim=1600, depth=48, num_heads=16, **kwargs)
+    model_kwargs = dict(hidden_size=1600, depth=48, num_heads=16, **kwargs)
     return _create_gpt_model(**model_kwargs)
 
 
@@ -173,7 +173,7 @@ def gpt2_6B(**kwargs):
 
 
 def gpt2_8B(**kwargs):
-    model_kwargs = dict(dim=3072, depth=72, num_heads=24, **kwargs)
+    model_kwargs = dict(hidden_size=3072, depth=72, num_heads=24, **kwargs)
     return _create_gpt_model(**model_kwargs)
 
 
@@ -223,5 +223,5 @@ def gpt2_40B(**kwargs):
 
 
 def gpt3(**kwargs):
-    model_kwargs = dict(dim=12288, depth=96, num_heads=96, **kwargs)
+    model_kwargs = dict(hidden_size=12288, depth=96, num_heads=96, **kwargs)
     return _create_gpt_model(**model_kwargs)

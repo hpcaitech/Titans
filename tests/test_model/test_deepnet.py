@@ -17,7 +17,7 @@ VOCAB_SIZE = 50304
 def run_deepnet(data, hidden_size, num_heads):
 
     #build model
-    model = DeepNet(dim=hidden_size, num_heads=num_heads).cuda()
+    model = DeepNet(hidden_size=hidden_size, num_heads=num_heads).cuda()
 
     # forward
     out = model(data)

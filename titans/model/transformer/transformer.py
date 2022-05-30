@@ -9,7 +9,7 @@ from titans.layer.block import TransformerEncoderLayer, TransformerEncoder, \
 class Transformer(nn.Module):
 
     def __init__(self,
-                 d_model=512,
+                 hidden_size=512,
                  nhead=8,
                  num_encoder_layers=6,
                  num_decoder_layers=6,
@@ -18,18 +18,18 @@ class Transformer(nn.Module):
                  return_intermediate_dec=False):
         super().__init__()
 
-        encoder_layer = TransformerEncoderLayer(d_model, nhead, dim_feedforward, dropout)
-        encoder_norm = col_nn.LayerNorm(d_model)
+        encoder_layer = TransformerEncoderLayer(hidden_size, nhead, dim_feedforward, dropout)
+        encoder_norm = col_nn.LayerNorm(hidden_size)
         self.encoder = TransformerEncoder(encoder_layer, num_encoder_layers, encoder_norm)
 
-        decoder_layer = TransformerDecoderLayer(d_model, nhead, dim_feedforward, dropout)
-        decoder_norm = col_nn.LayerNorm(d_model)
+        decoder_layer = TransformerDecoderLayer(hidden_size, nhead, dim_feedforward, dropout)
+        decoder_norm = col_nn.LayerNorm(hidden_size)
         self.decoder = TransformerDecoder(decoder_layer,
                                           num_decoder_layers,
                                           decoder_norm,
                                           return_intermediate=return_intermediate_dec)
 
-        self.d_model = d_model
+        self.hidden_size = hidden_size
         self.nhead = nhead
 
     def forward(self, src, mask, query_embed, pos_embed):

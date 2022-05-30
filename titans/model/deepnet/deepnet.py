@@ -48,7 +48,7 @@ class DeepNet(nn.Module):
     def __init__(self,
                  vocab_size: int = 50304,
                  max_position_embeddings: int = 1024,
-                 dim: int = 768,
+                 hidden_size: int = 768,
                  num_heads: int = 12,
                  depth: int = 12,
                  mlp_ratio: float = 4.0,
@@ -64,7 +64,7 @@ class DeepNet(nn.Module):
                  checkpoint: bool = False,
                  activation_offload: bool = False) -> None:
         super().__init__()
-        self.embed = GPTEmbedding(embedding_dim=dim,
+        self.embed = GPTEmbedding(embedding_dim=hidden_size,
                                   vocab_size=vocab_size,
                                   max_position_embeddings=max_position_embeddings,
                                   padding_idx=padding_idx,
@@ -72,7 +72,7 @@ class DeepNet(nn.Module):
                                   dtype=dtype)
         alpha = math.sqrt(2 * depth)
         self.blocks = nn.ModuleList([
-            DeepNetBlock(dim=dim,
+            DeepNetBlock(hidden_size=hidden_size,
                          num_heads=num_heads,
                          mlp_ratio=mlp_ratio,
                          activation=activation,
@@ -87,9 +87,9 @@ class DeepNet(nn.Module):
                          activation_offload=activation_offload) for _ in range(depth)
         ])
 
-        self.norm = col_nn.LayerNorm(normalized_shape=dim, eps=layernorm_epsilon, dtype=dtype)
+        self.norm = col_nn.LayerNorm(normalized_shape=hidden_size, eps=layernorm_epsilon, dtype=dtype)
 
-        self.head = GPTLMHead(dim=dim, vocab_size=vocab_size, embedding_layer=self.embed, dtype=dtype)
+        self.head = GPTLMHead(hidden_size=hidden_size, vocab_size=vocab_size, embedding_layer=self.embed, dtype=dtype)
 
     def forward(self, input_ids, attention_mask=None):
 

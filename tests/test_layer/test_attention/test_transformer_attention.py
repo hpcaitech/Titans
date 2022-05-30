@@ -43,7 +43,7 @@ def run_transformer_attention(data, hidden_size, num_heads):
 def run_gpt_attention(data, hidden_size, num_heads):
 
     #build model
-    model = GPTSelfAttention(dim=hidden_size, num_heads=num_heads, attention_dropout=0.0, dropout=0.0).cuda()
+    model = GPTSelfAttention(hidden_size=hidden_size, num_heads=num_heads, attention_dropout=0.0, dropout=0.0).cuda()
 
     # forward
     out = model(data)
@@ -55,7 +55,7 @@ def run_gpt_attention(data, hidden_size, num_heads):
 def run_vit_attention(data, hidden_size, num_heads):
 
     #build model
-    model = ViTSelfAttention(dim=hidden_size, num_heads=num_heads, attention_dropout=0.0, dropout=0.0).cuda()
+    model = ViTSelfAttention(hidden_size=hidden_size, num_heads=num_heads, attention_dropout=0.0, dropout=0.0).cuda()
 
     # forward
     out = model(data)

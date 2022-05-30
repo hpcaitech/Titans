@@ -27,7 +27,7 @@ class ViTMoE(nn.Module):
                  in_chans: int = 3,
                  num_classes: int = 1000,
                  depth: int = 12,
-                 d_model: int = 768,
+                 hidden_size: int = 768,
                  num_heads: int = 12,
                  d_kv: int = 64,
                  d_ff: int = 3072,
@@ -48,7 +48,7 @@ class ViTMoE(nn.Module):
         embedding = VanillaPatchEmbedding(img_size=img_size,
                                           patch_size=patch_size,
                                           in_chans=in_chans,
-                                          embed_size=d_model)
+                                          embed_size=hidden_size)
         embed_dropout = Dropout(p=drop_rate, mode=ParallelMode.TENSOR)
 
         # stochastic depth decay rule
@@ -56,14 +56,14 @@ class ViTMoE(nn.Module):
         blocks = []
         for i in range(depth):
             sa = SelfAttentionForMoe(**moe_sa_args(
-                d_model=d_model, n_heads=num_heads, d_kv=d_kv, attention_drop=attention_drop, drop_rate=drop_rate))
+                hidden_size=hidden_size, n_heads=num_heads, d_kv=d_kv, attention_drop=attention_drop, drop_rate=drop_rate))
 
             if i % 2 == 0:
-                ffn = MLPForMoe(**moe_mlp_args(d_model=d_model, d_ff=d_ff, drop_rate=drop_rate))
+                ffn = MLPForMoe(**moe_mlp_args(hidden_size=hidden_size, d_ff=d_ff, drop_rate=drop_rate))
             else:
                 num_experts = num_experts_list[i // 2]
-                experts = build_ffn_experts(num_experts, d_model, d_ff, drop_rate=drop_rate)
-                ffn = MoeModule(dim_model=d_model,
+                experts = build_ffn_experts(num_experts, hidden_size, d_ff, drop_rate=drop_rate)
+                ffn = MoeModule(dim_model=hidden_size,
                                 num_experts=num_experts,
                                 top_k=1 if use_residual else 2,
                                 capacity_factor_train=capacity_factor_train,
@@ -73,17 +73,17 @@ class ViTMoE(nn.Module):
                                 use_residual=use_residual,
                                 expert_instance=experts,
                                 expert_cls=MLPForMoe,
-                                **moe_mlp_args(d_model=d_model, d_ff=d_ff, drop_rate=drop_rate))
+                                **moe_mlp_args(hidden_size=hidden_size, d_ff=d_ff, drop_rate=drop_rate))
 
             layer = TransformerLayer(att=sa,
                                      ffn=ffn,
-                                     norm1=nn.LayerNorm(d_model, eps=1e-6),
-                                     norm2=nn.LayerNorm(d_model, eps=1e-6),
+                                     norm1=nn.LayerNorm(hidden_size, eps=1e-6),
+                                     norm2=nn.LayerNorm(hidden_size, eps=1e-6),
                                      droppath=DropPath(p=dpr[i], mode=ParallelMode.TENSOR))
             blocks.append(layer)
 
-        norm = nn.LayerNorm(d_model, eps=1e-6)
-        self.linear = VanillaClassifier(in_features=d_model, num_classes=num_classes)
+        norm = nn.LayerNorm(hidden_size, eps=1e-6)
+        self.linear = VanillaClassifier(in_features=hidden_size, num_classes=num_classes)
         nn.init.zeros_(self.linear.weight)
         nn.init.zeros_(self.linear.bias)
         self.vitmoe = nn.Sequential(embedding, embed_dropout, *blocks, norm)

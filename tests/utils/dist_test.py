@@ -22,3 +22,20 @@ def run_with_parallel_config(world_size, parallel_mode, run_func):
 
     run_func = partial(run_func, world_size=world_size, port=port, config=config)
     mp.spawn(run_func, nprocs=world_size)
+
+
+def run_with_moe_config(world_size, run_func):
+    """
+    A wrapper function to reuse the same code snippet in layer/model testing.
+
+    Args:
+        world_size (int): the number of processes to launch
+        run_func (Callable): the function to launch multiple processes, must have world_size, port and config as arguments.
+    """
+
+    port = free_port()
+
+    config = dict()
+
+    run_func = partial(run_func, world_size=world_size, port=port, config=config)
+    mp.spawn(run_func, nprocs=world_size)

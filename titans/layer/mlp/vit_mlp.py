@@ -9,7 +9,7 @@ from ..init_rules import init_rules
 class ViTMLP(nn.Module):
 
     def __init__(self,
-                 dim: int,
+                 hidden_size: int,
                  mlp_ratio: int,
                  activation: Callable,
                  dropout: float,
@@ -17,15 +17,15 @@ class ViTMLP(nn.Module):
                  bias: bool = True,
                  init_method: str = 'torch'):
         super().__init__()
-        self.dense_1 = col_nn.Linear(dim,
-                                     mlp_ratio * dim,
+        self.dense_1 = col_nn.Linear(hidden_size,
+                                     mlp_ratio * hidden_size,
                                      dtype=dtype,
                                      bias=bias,
                                      **init_rules[init_method]['transformer'])
         self.activation = activation
         self.dropout_1 = col_nn.Dropout(dropout)
-        self.dense_2 = col_nn.Linear(mlp_ratio * dim,
-                                     dim,
+        self.dense_2 = col_nn.Linear(mlp_ratio * hidden_size,
+                                     hidden_size,
                                      dtype=dtype,
                                      bias=bias,
                                      **init_rules[init_method]['transformer'])
