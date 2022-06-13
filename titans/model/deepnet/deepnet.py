@@ -8,7 +8,7 @@ from colossalai import nn as col_nn
 from colossalai.nn.layer.wrapper import PipelineSharedModuleWrapper
 from colossalai.core import global_context as gpc
 import inspect
-from colossalai.builder.pipeline import partition_uniform
+from colossalai.pipeline.utils import partition_uniform
 from colossalai import kernel
 from colossalai.logging import get_dist_logger
 from titans.decorator import support_tp_pp_only
