@@ -3,7 +3,7 @@ from typing import Callable
 
 import torch
 from colossalai import nn as col_nn
-from colossalai.builder.pipeline import partition_uniform
+from colossalai.pipeline.utils import partition_uniform
 from colossalai.context import ParallelMode
 from colossalai.core import global_context as gpc
 from colossalai.logging import get_dist_logger
@@ -96,7 +96,7 @@ class GPT(nn.Module):
             hidden_size=hidden_size,
             vocab_size=vocab_size,
             embedding_layer=self.embed,
-            # word_embeeding_weight=self.embed.word_embedding_weight,
+        # word_embeeding_weight=self.embed.word_embedding_weight,
             dtype=dtype)
 
     def forward(self, input_ids, attention_mask=None):
