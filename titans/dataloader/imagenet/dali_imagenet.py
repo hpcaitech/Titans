@@ -186,23 +186,20 @@ class DaliDataloader(DALIClassificationIterator):
         return self
 
     def __next__(self):
-        try:
-            data = super().__next__()
-        except StopIteration:
-            data = super().__next__()
+        data = super().__next__()
         img, label = data[0]['data'], data[0]['label']
         label = label.squeeze()
 
         return img, label
 
 
-def _build_dali_imagenet_train(root, rand_augment=False):
+def _build_dali_imagenet_train(root, batch_size, rand_augment=False):
     train_pat = os.path.join(root, 'train/*')
     train_idx_pat = os.path.join(root, 'idx_files/train/*')
     if rand_augment:
         train_dataloader = DaliDataloaderWithRandAug(sorted(glob.glob(train_pat)),
                                                      sorted(glob.glob(train_idx_pat)),
-                                                     batch_size=gpc.config.BATCH_SIZE,
+                                                     batch_size=batch_size,
                                                      shard_id=gpc.get_local_rank(ParallelMode.DATA),
                                                      num_shards=gpc.get_world_size(ParallelMode.DATA),
                                                      gpu_aug=gpc.config.dali.gpu_aug,
@@ -213,7 +210,7 @@ def _build_dali_imagenet_train(root, rand_augment=False):
         train_dataloader = DaliDataloader(
             sorted(glob.glob(train_pat)),
             sorted(glob.glob(train_idx_pat)),
-            batch_size=gpc.config.BATCH_SIZE,
+            batch_size=batch_size,
             shard_id=gpc.get_local_rank(ParallelMode.DATA),
             num_shards=gpc.get_world_size(ParallelMode.DATA),
             training=True,
@@ -223,13 +220,13 @@ def _build_dali_imagenet_train(root, rand_augment=False):
     return train_dataloader
 
 
-def _build_dali_imagenet_test(root, rand_augment=False):
+def _build_dali_imagenet_test(root, batch_size, rand_augment=False):
     val_pat = os.path.join(root, 'validation/*')
     val_idx_pat = os.path.join(root, 'idx_files/validation/*')
     if rand_augment:
         test_dataloader = DaliDataloaderWithRandAug(sorted(glob.glob(val_pat)),
                                                     sorted(glob.glob(val_idx_pat)),
-                                                    batch_size=gpc.config.BATCH_SIZE,
+                                                    batch_size=batch_size,
                                                     shard_id=gpc.get_local_rank(ParallelMode.DATA),
                                                     num_shards=gpc.get_world_size(ParallelMode.DATA),
                                                     training=False,
@@ -240,7 +237,7 @@ def _build_dali_imagenet_test(root, rand_augment=False):
         test_dataloader = DaliDataloader(
             sorted(glob.glob(val_pat)),
             sorted(glob.glob(val_idx_pat)),
-            batch_size=gpc.config.BATCH_SIZE,
+            batch_size=batch_size,
             shard_id=gpc.get_local_rank(ParallelMode.DATA),
             num_shards=gpc.get_world_size(ParallelMode.DATA),
             training=False,
@@ -250,7 +247,7 @@ def _build_dali_imagenet_test(root, rand_augment=False):
     return test_dataloader
 
 
-def build_dali_imagenet(root, rand_augment=False):
-    train_dataloader = _build_dali_imagenet_train(root, rand_augment=rand_augment)
-    test_dataloader = _build_dali_imagenet_test(root, rand_augment=rand_augment)
+def build_dali_imagenet(root, train_batch_size, test_batch_size, train_rand_augment=False, test_rand_augment=False):
+    train_dataloader = _build_dali_imagenet_train(root, train_batch_size, rand_augment=train_rand_augment)
+    test_dataloader = _build_dali_imagenet_test(root, test_batch_size, rand_augment=test_rand_augment)
     return train_dataloader, test_dataloader
