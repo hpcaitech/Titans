@@ -42,30 +42,6 @@ class DeTrAttention(nn.Module):
         self.softmax = nn.Softmax(dim=-1)
 
     def forward(self, q, k, v, attn_mask=None, key_padding_mask=None):
-        # bsz, tgt_len, all_head_size = q.shape
-        # _, src_len, _ = k.shape
-
-        # num_attention_heads = all_head_size // self.attention_head_size
-
-        # if key_padding_mask is not None:
-        #     assert key_padding_mask.shape == (bsz, src_len), \
-        #         f"expecting key_padding_mask shape of {(bsz, src_len)}, but got {key_padding_mask.shape}"
-        #     key_padding_mask = key_padding_mask.view(bsz, 1, 1, src_len).   \
-        #         expand(-1, num_attention_heads, -1, -1).reshape(bsz * num_attention_heads, 1, src_len)
-        #     if attn_mask is None:
-        #         attn_mask = key_padding_mask
-        #     elif attn_mask.dtype == torch.bool:
-        #         attn_mask = attn_mask.logical_or(key_padding_mask)
-        #     else:
-        #         attn_mask = attn_mask.masked_fill(key_padding_mask, float("-inf"))
-
-        # # convert mask to float
-        # if attn_mask is not None and attn_mask.dtype == torch.bool:
-        #     new_attn_mask = torch.zeros_like(attn_mask, dtype=q.dtype)
-        #     new_attn_mask.masked_fill_(attn_mask, float("-inf"))
-        #     attn_mask = new_attn_mask
-
-
         q = self.query(q)
         k = self.key(k)
         v = self.value(v)
