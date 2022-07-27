@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Build and Test Colossal-AI
+    name: Build and Test Titans
     if: |
         github.event.pull_request.draft == false &&
         github.base_ref == 'main' &&
@@ -23,7 +23,7 @@ jobs:
           ssh-key: ${{ secrets.SSH_KEY_FOR_CI }}
       - name: Install Colossal-AI      
         run: |
-          pip install colossalai==0.1.4+torch1.10cu11.3 -f https://release.colossalai.org
+          pip install colossalai==0.1.7+torch1.10cu11.3 -f https://release.colossalai.org
           pip install -v .
           pip install -r requirements/requirements-test.txt
       - name: Unit Testing
