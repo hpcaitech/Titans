@@ -6,6 +6,7 @@ import logging
 import os
 import torch
 import transformers
+import torch.distributed as dist
 
 try:
   from lddl.utils import get_all_parquets_under, get_all_bin_ids, get_file_paths_for_bin_id
@@ -27,7 +28,6 @@ class BertPretrainDataset(ParquetDataset):
 
 def get_bert_pretrain_data_loader(
     path,
-    local_rank=0,
     shuffle_buffer_size=16384,
     shuffle_buffer_warmup_factor=16,
     tokenizer_class=transformers.BertTokenizerFast,
@@ -37,7 +37,6 @@ def get_bert_pretrain_data_loader(
     data_loader_kwargs={},
     mlm_probability=0.15,
     base_seed=12345,
-    verbose=False,
     log_dir=None,
     log_level=logging.INFO,
     return_raw_samples=False,
@@ -150,7 +149,6 @@ def get_bert_pretrain_data_loader(
       ...
   """
   assert isinstance(path, str)
-  assert isinstance(local_rank, int) and local_rank >= 0
   assert isinstance(shuffle_buffer_size, int) and shuffle_buffer_size > 0
   assert (isinstance(shuffle_buffer_warmup_factor, int) and
           shuffle_buffer_warmup_factor > 0)
@@ -170,6 +168,8 @@ def get_bert_pretrain_data_loader(
   }
   assert isinstance(return_raw_samples, bool)
   assert isinstance(start_epoch, int)
+
+  local_rank = dist.get_rank(process_group)
 
   if os.path.isfile(vocab_file):
     tokenizer = tokenizer_class(vocab_file, **tokenizer_kwargs)
