@@ -12,9 +12,10 @@ from lddl.types import File
 from lddl.utils import get_num_samples_of_parquet
 from lddl.random import sample
 from lddl.torch.datasets import ShuffleBuffer
+from lddl.torch.datasets import ParquetDataset as PD
 
 
-class ParquetDataset(IterableDataset):
+class ParquetDataset(PD, IterableDataset):
 
   def __init__(
       self,
@@ -27,7 +28,9 @@ class ParquetDataset(IterableDataset):
       start_epoch=0,
       process_group=None
   ):
-    super().__init__()
+    # we do not want to init the original PD as it is overridden by this function
+    # we only init with IterabledDataset
+    IterableDataset.__init__(self)
     self._transform = transform
     self._shuffle_buffer_size = shuffle_buffer_size
     self._shuffle_buffer_warmup_factor = shuffle_buffer_warmup_factor
