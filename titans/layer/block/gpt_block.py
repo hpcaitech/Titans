@@ -12,7 +12,6 @@ from titans.decorator import support_tp_pp_only
 from titans.layer.mlp import TransformerMLP
 
 
-@support_tp_pp_only()
 class GPTBlock(CheckpointModule):
 
     def __init__(self,
@@ -101,7 +100,6 @@ class MOEGPTBlock(CheckpointModule):
         mpl_factory_dict = dict(hidden_size=hidden_size,
                                 mlp_ratio=mlp_ratio,
                                 activation=activation,
-                                # dropout=dropout,
                                 dtype=dtype,
                                 bias=bias)
 
@@ -111,10 +109,11 @@ class MOEGPTBlock(CheckpointModule):
                              capacity_factor_train=capacity_factor_train,
                              capacity_factor_eval=capacity_factor_eval,
                              noisy_policy='Jitter',
+                             use_residual=use_residual,
                              expert_cls=TransformerMLP,
                              **mpl_factory_dict)
 
-    def _forward(self, x, attention_mask=None):
+    def _forward(self, x, y, attention_mask=None):
         if not self.apply_post_layernorm:
             residual = x
         x = self.norm1(x)
@@ -127,6 +126,9 @@ class MOEGPTBlock(CheckpointModule):
         x = self.norm2(x)
         if self.apply_post_layernorm:
             residual = x
-        x = residual + self.mlp(x)
+        x, z = self.mlp(x)
 
-        return x, attention_mask
+        x = residual + x
+        y = y + z
+
+        return x, y, attention_mask
