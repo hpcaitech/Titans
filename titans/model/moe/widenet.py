@@ -33,11 +33,11 @@ class Widenet(nn.Module):
                  drop_path: float = 0.):
         super().__init__()
 
-        embedding = VanillaPatchEmbedding(img_size=img_size,
-                                          patch_size=patch_size,
-                                          in_chans=in_chans,
-                                          embed_size=hidden_size)
-        embed_dropout = Dropout(p=drop_rate, mode=ParallelMode.TENSOR)
+        self.embedding = VanillaPatchEmbedding(img_size=img_size,
+                                               patch_size=patch_size,
+                                               in_chans=in_chans,
+                                               embed_size=hidden_size)
+        self.embed_dropout = Dropout(p=drop_rate, mode=ParallelMode.TENSOR)
 
         shared_sa = SelfAttentionForMoe(**moe_sa_args(
             hidden_size=hidden_size, n_heads=num_heads, d_kv=d_kv, attention_drop=attention_drop, drop_rate=drop_rate))
@@ -61,15 +61,26 @@ class Widenet(nn.Module):
                              norm2=nn.LayerNorm(hidden_size, eps=1e-6),
                              droppath=DropPath(p=dpr[i], mode=ParallelMode.TENSOR)) for i in range(depth)
         ]
-        norm = nn.LayerNorm(hidden_size, eps=1e-6)
+
+        self.blocks = nn.ModuleList(blocks)
+        self.norm = nn.LayerNorm(hidden_size, eps=1e-6)
         self.linear = VanillaClassifier(in_features=hidden_size, num_classes=num_classes)
         nn.init.zeros_(self.linear.weight)
         nn.init.zeros_(self.linear.bias)
-        self.widenet = nn.Sequential(embedding, embed_dropout, *blocks, norm)
 
     def forward(self, x):
         MOE_CONTEXT.reset_loss()
-        x = self.widenet(x)
+
+        x = self.embedding(x)
+        x = self.embed_dropout(x)
+
+        y = 0
+        for block in self.blocks:
+            x, y = block(x, y)
+
+        x = self.norm(x)
         x = torch.mean(x, dim=1)
         x = self.linear(x)
+
+        MOE_CONTEXT.add_loss(y)
         return x

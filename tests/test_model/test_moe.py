@@ -1,6 +1,7 @@
 import colossalai
 import torch
 
+from colossalai.context import MOE_CONTEXT
 from titans.model.moe import MOEGPT, ViTMoE, Widenet
 from colossalai.global_variables import tensor_parallel_env as tp_env
 from colossalai.testing import rerun_if_address_is_in_use
@@ -17,12 +18,10 @@ HIDDEN_SIZE = 32
 SEQ_LENGHT = 16
 VOCAB_SIZE = 50304
 
-def run_moe_gpt(data, num_experts, hidden_size, num_heads):
 
-    #build model
-    model = MOEGPT(num_experts=num_experts,
-                    hidden_size = hidden_size,
-                    num_heads=num_heads).cuda()
+def run_moe_gpt(data, num_experts, hidden_size, num_heads):
+    # build model
+    model = MOEGPT(num_experts=num_experts, hidden_size=hidden_size, num_heads=num_heads).cuda()
 
     # forward
     out = model(data)
@@ -32,14 +31,13 @@ def run_moe_gpt(data, num_experts, hidden_size, num_heads):
 
 
 def run_vit_moe(data, num_experts, img_size, patch_size, in_chans, hidden_size, num_heads):
-
-    #build model
+    # build model
     model = ViTMoE(num_experts=num_experts,
-                    img_size=img_size,
-                    patch_size=patch_size,
-                    in_chans=in_chans,
-                    hidden_size=hidden_size,
-                    num_heads=num_heads).cuda()
+                   img_size=img_size,
+                   patch_size=patch_size,
+                   in_chans=in_chans,
+                   hidden_size=hidden_size,
+                   num_heads=num_heads).cuda()
 
     # forward
     out = model(data)
@@ -49,8 +47,7 @@ def run_vit_moe(data, num_experts, img_size, patch_size, in_chans, hidden_size, 
 
 
 def run_widenet(data, num_experts, img_size, patch_size, in_chans, hidden_size, num_heads):
-
-    #build model
+    # build model
     model = Widenet(num_experts=num_experts,
                     img_size=img_size,
                     patch_size=patch_size,
@@ -70,7 +67,7 @@ def run_dist(rank, world_size, port, config):
 
     if tp_env.mode == 'sequence':
         tp_env.mode = None
-
+    MOE_CONTEXT.setup(42)
     language_data = torch.rand(BATCH_SIZE, SEQ_LENGHT) * VOCAB_SIZE
     language_data = language_data.int().cuda()
     run_moe_gpt(language_data, NUM_EXPERTS, HIDDEN_SIZE, NUM_HEADS)
