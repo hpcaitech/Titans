@@ -33,7 +33,8 @@ class ViTMoE(nn.Module):
                  d_ff: int = 3072,
                  attention_drop: float = 0.,
                  drop_rate: float = 0.1,
-                 drop_path: float = 0.):
+                 drop_path: float = 0.,
+                 checkpoint: bool = False):
         super().__init__()
 
         assert depth % 2 == 0, "The number of layers should be even right now"
@@ -45,18 +46,21 @@ class ViTMoE(nn.Module):
         else:
             num_experts_list = [num_experts] * (depth // 2)
 
-        embedding = VanillaPatchEmbedding(img_size=img_size,
-                                          patch_size=patch_size,
-                                          in_chans=in_chans,
-                                          embed_size=hidden_size)
-        embed_dropout = Dropout(p=drop_rate, mode=ParallelMode.TENSOR)
+        self.embedding = VanillaPatchEmbedding(img_size=img_size,
+                                               patch_size=patch_size,
+                                               in_chans=in_chans,
+                                               embed_size=hidden_size)
+        self.embed_dropout = Dropout(p=drop_rate, mode=ParallelMode.TENSOR)
 
         # stochastic depth decay rule
         dpr = [x.item() for x in torch.linspace(0, drop_path, depth)]
         blocks = []
         for i in range(depth):
-            sa = SelfAttentionForMoe(**moe_sa_args(
-                hidden_size=hidden_size, n_heads=num_heads, d_kv=d_kv, attention_drop=attention_drop, drop_rate=drop_rate))
+            sa = SelfAttentionForMoe(**moe_sa_args(hidden_size=hidden_size,
+                                                   n_heads=num_heads,
+                                                   d_kv=d_kv,
+                                                   attention_drop=attention_drop,
+                                                   drop_rate=drop_rate))
 
             if i % 2 == 0:
                 ffn = MLPForMoe(**moe_mlp_args(hidden_size=hidden_size, d_ff=d_ff, drop_rate=drop_rate))
@@ -79,18 +83,29 @@ class ViTMoE(nn.Module):
                                      ffn=ffn,
                                      norm1=nn.LayerNorm(hidden_size, eps=1e-6),
                                      norm2=nn.LayerNorm(hidden_size, eps=1e-6),
-                                     droppath=DropPath(p=dpr[i], mode=ParallelMode.TENSOR))
+                                     droppath=DropPath(p=dpr[i], mode=ParallelMode.TENSOR),
+                                     checkpoint=checkpoint)
             blocks.append(layer)
 
-        norm = nn.LayerNorm(hidden_size, eps=1e-6)
+        self.blocks = nn.ModuleList(blocks)
+        self.norm = nn.LayerNorm(hidden_size, eps=1e-6)
         self.linear = VanillaClassifier(in_features=hidden_size, num_classes=num_classes)
         nn.init.zeros_(self.linear.weight)
         nn.init.zeros_(self.linear.bias)
-        self.vitmoe = nn.Sequential(embedding, embed_dropout, *blocks, norm)
 
     def forward(self, x):
         MOE_CONTEXT.reset_loss()
-        x = self.vitmoe(x)
+
+        x = self.embedding(x)
+        x = self.embed_dropout(x)
+
+        y = 0
+        for block in self.blocks:
+            x, y = block(x, y)
+
+        x = self.norm(x)
         x = torch.mean(x, dim=1)
         x = self.linear(x)
+
+        MOE_CONTEXT.add_loss(y)
         return x
